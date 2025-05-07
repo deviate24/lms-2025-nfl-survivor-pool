@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ entry.entry_name }} - LMS 2025{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mb-4">{{ entry.entry_name }}</h1>
+        
+        <div class="alert {% if entry.is_alive %}alert-success{% else %}alert-danger{% endif %}">
+            <h5>Status: {% if entry.is_alive %}Alive{% else %}Eliminated{% endif %}</h5>
+            {% if not entry.is_alive %}
+                <p>Eliminated in Week {{ entry.eliminated_in_week.number }}</p>
+            {% endif %}
+        </div>
+        
+        {% if current_week %}
+            <div class="alert alert-info">
+                <h5>Current Week: {{ current_week }}</h5>
+                <p><strong>Deadline:</strong> {{ current_week.deadline|date:"l, F j, Y, g:i A T" }}</p>
+                {% if current_week.is_double %}
+                    <p><strong>Double-Pick Week:</strong> You must select two teams this week. At least one must win for you to survive.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Current Week Pick</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if entry.is_alive %}
+                            {% if has_current_pick %}
+                                <h6>Week {{ current_week.number }} Pick{% if current_week.is_double %}s{% endif %}:</h6>
+                                <ul class="list-group mb-3">
+                                    {% for pick in current_week_picks %}
+                                        <li class="list-group-item">
+                                            {{ pick.team.city }} {{ pick.team.name }}
+                                            {% if pick.result == 'win' %}
+                                                <span class="badge bg-success float-end">Win</span>
+                                            {% elif pick.result == 'loss' %}
+                                                <span class="badge bg-danger float-end">Loss</span>
+                                            {% elif pick.result == 'tie' %}
+                                                <span class="badge bg-warning float-end">Tie</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary float-end">Pending</span>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                
+                                {% if not current_week.is_past_deadline %}
+                                    <div class="d-grid">
+                                        <a href="{% url 'make_pick' entry.id %}" class="btn btn-primary">Change Pick</a>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                {% if not current_week.is_past_deadline %}
+                                    <p>You haven't made a pick for Week {{ current_week.number }} yet.</p>
+                                    <div class="d-grid">
+                                        <a href="{% url 'make_pick' entry.id %}" class="btn btn-primary">Make Pick</a>
+                                    </div>
+                                {% else %}
+                                    <p class="text-danger">You missed the deadline for Week {{ current_week.number }}.</p>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <p>This entry has been eliminated and cannot make picks.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Available Teams</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if available_teams %}
+                            <p>You have {{ available_teams.count }} teams available to pick:</p>
+                            <div class="row">
+                                {% for team in available_teams %}
+                                    <div class="col-md-6 mb-1">
+                                        <small>{{ team.city }} {{ team.name }}</small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>No teams available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Pick History</h5>
+            </div>
+            <div class="card-body">
+                {% if picks %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Week</th>
+                                    <th>Team</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pick in picks %}
+                                    <tr>
+                                        <td>{{ pick.week.number }}</td>
+                                        <td>{{ pick.team.city }} {{ pick.team.name }}</td>
+                                        <td>
+                                            {% if pick.result == 'win' %}
+                                                <span class="badge bg-success">Win</span>
+                                            {% elif pick.result == 'loss' %}
+                                                <span class="badge bg-danger">Loss</span>
+                                            {% elif pick.result == 'tie' %}
+                                                <span class="badge bg-warning">Tie</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No picks have been made yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

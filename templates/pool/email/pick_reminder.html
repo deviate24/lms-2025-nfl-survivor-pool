@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS 2025: Week {{ week.number }} Pick Reminder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #0d2545;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .deadline {
+            font-weight: bold;
+            color: #ff0000;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            background-color: #1db954;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LMS 2025 NFL Survivor Pool</h1>
+    </div>
+    <div class="content">
+        <p>Hello {{ user.username }},</p>
+        
+        <p>This is a reminder that you have not yet made your pick for Week {{ week.number }} for your entry <strong>{{ entry.entry_name }}</strong>.</p>
+        
+        {% if is_double_pick %}
+            <p><strong>Note:</strong> This is a double-pick week. You need to select two teams, and at least one must win for your entry to survive.</p>
+        {% endif %}
+        
+        <p>
+            <span class="deadline">Deadline: {{ deadline|date:"l, F j, Y, g:i A T" }}</span>
+        </p>
+        
+        <p>If you don't make a pick before the deadline, your entry will be eliminated.</p>
+        
+        <p>Please log in to the LMS 2025 site to make your pick:</p>
+        
+        <p style="text-align: center;">
+            <a href="http://lms2025.example.com/entry/{{ entry.id }}/pick/" class="button">Make Your Pick Now</a>
+        </p>
+        
+        <p>Good luck!</p>
+        
+        <p>
+            - LMS 2025 Team
+        </p>
+    </div>
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p>If you no longer wish to receive reminder emails, you can update your preferences in your profile settings.</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Logged Out - LMS 2025{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title mb-0">Logged Out</h2>
+            </div>
+            <div class="card-body">
+                <p>You have been successfully logged out.</p>
+                <div class="d-grid">
+                    <a href="{% url 'login' %}" class="btn btn-primary">Log In Again</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

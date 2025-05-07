@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Week {{ week.number }} Picks - {{ pool.name }} - LMS 2025{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mb-4">{{ pool.name }} - Week {{ week.number }} Picks</h1>
+        
+        <div class="alert alert-info">
+            <p><strong>Week:</strong> {{ week.description }}</p>
+            <p><strong>Deadline:</strong> {{ week.deadline|date:"l, F j, Y, g:i A T" }}</p>
+            {% if is_double_pick %}
+                <p><strong>Double-Pick Week:</strong> Entries needed to select two teams. At least one win was required to survive.</p>
+            {% endif %}
+        </div>
+        
+        {% if teams_with_counts %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Pick Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Team</th>
+                                    <th>Picked By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in teams_with_counts %}
+                                    <tr>
+                                        <td>{{ item.team.city }} {{ item.team.name }}</td>
+                                        <td>{{ item.count }} entries</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">All Picks</h5>
+            </div>
+            <div class="card-body">
+                {% if picks %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Entry</th>
+                                    <th>Team</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pick in picks %}
+                                    <tr>
+                                        <td>{{ pick.entry.entry_name }}</td>
+                                        <td>{{ pick.team.city }} {{ pick.team.name }}</td>
+                                        <td>
+                                            {% if pick.result == 'win' %}
+                                                <span class="badge bg-success">Win</span>
+                                            {% elif pick.result == 'loss' %}
+                                                <span class="badge bg-danger">Loss</span>
+                                            {% elif pick.result == 'tie' %}
+                                                <span class="badge bg-warning">Tie</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Pending</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <p>No picks have been made for this week yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <a href="{% url 'pool_detail' pool.id %}" class="btn btn-primary">Back to Pool</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

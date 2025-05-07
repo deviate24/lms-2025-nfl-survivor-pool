@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Standings - {{ pool.name }} - LMS 2025{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mb-4">{{ pool.name }} - Standings</h1>
+        
+        <ul class="nav nav-tabs mb-4" id="standingsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="alive-tab" data-bs-toggle="tab" data-bs-target="#alive" type="button" role="tab" aria-controls="alive" aria-selected="true">
+                    Alive ({{ alive_entries.count }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="eliminated-tab" data-bs-toggle="tab" data-bs-target="#eliminated" type="button" role="tab" aria-controls="eliminated" aria-selected="false">
+                    Eliminated ({{ eliminated_entries.count }})
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="standingsTabsContent">
+            <div class="tab-pane fade show active" id="alive" role="tabpanel" aria-labelledby="alive-tab">
+                {% if alive_entries %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Entry</th>
+                                    <th>Last Pick</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in alive_entries %}
+                                    <tr>
+                                        <td>{{ entry.entry_name }}</td>
+                                        <td>
+                                            {% with last_pick=entry.picks.last %}
+                                                {% if last_pick %}
+                                                    Week {{ last_pick.week.number }}: {{ last_pick.team.city }} {{ last_pick.team.name }}
+                                                    {% if last_pick.result == 'win' %}
+                                                        <span class="badge bg-success">Win</span>
+                                                    {% elif last_pick.result == 'loss' %}
+                                                        <span class="badge bg-danger">Loss</span>
+                                                    {% elif last_pick.result == 'tie' %}
+                                                        <span class="badge bg-warning">Tie</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">Pending</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    No picks yet
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <p>No entries are currently alive in this pool.</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="tab-pane fade" id="eliminated" role="tabpanel" aria-labelledby="eliminated-tab">
+                {% if eliminated_entries %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Entry</th>
+                                    <th>Eliminated In</th>
+                                    <th>Last Pick</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in eliminated_entries %}
+                                    <tr>
+                                        <td>{{ entry.entry_name }}</td>
+                                        <td>Week {{ entry.eliminated_in_week.number }}</td>
+                                        <td>
+                                            {% with last_pick=entry.picks.last %}
+                                                {% if last_pick %}
+                                                    {{ last_pick.team.city }} {{ last_pick.team.name }}
+                                                    {% if last_pick.result == 'win' %}
+                                                        <span class="badge bg-success">Win</span>
+                                                    {% elif last_pick.result == 'loss' %}
+                                                        <span class="badge bg-danger">Loss</span>
+                                                    {% elif last_pick.result == 'tie' %}
+                                                        <span class="badge bg-warning">Tie</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">Pending</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    No picks
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <p>No entries have been eliminated in this pool yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if current_week and current_week.is_past_deadline and teams_with_counts %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Week {{ current_week.number }} Pick Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Team</th>
+                                    <th>Picked By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in teams_with_counts %}
+                                    <tr>
+                                        <td>{{ item.team.city }} {{ item.team.name }}</td>
+                                        <td>{{ item.count }} entries</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <div class="mt-4">
+            <a href="{% url 'pool_detail' pool.id %}" class="btn btn-primary">Back to Pool</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

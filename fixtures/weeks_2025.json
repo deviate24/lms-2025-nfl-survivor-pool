@@ -1,0 +1,332 @@
+[
+  {
+    "model": "pool.week",
+    "pk": 1,
+    "fields": {
+      "number": 1,
+      "description": "Week 1",
+      "start_date": "2025-09-04",
+      "end_date": "2025-09-08",
+      "deadline": "2025-09-04T16:00:00-07:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-09-02T09:00:00-07:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 2,
+    "fields": {
+      "number": 2,
+      "description": "Week 2",
+      "start_date": "2025-09-11",
+      "end_date": "2025-09-15",
+      "deadline": "2025-09-11T16:00:00-07:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-09-09T09:00:00-07:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 3,
+    "fields": {
+      "number": 3,
+      "description": "Week 3",
+      "start_date": "2025-09-18",
+      "end_date": "2025-09-22",
+      "deadline": "2025-09-18T16:00:00-07:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-09-16T09:00:00-07:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 4,
+    "fields": {
+      "number": 4,
+      "description": "Week 4",
+      "start_date": "2025-09-25",
+      "end_date": "2025-09-29",
+      "deadline": "2025-09-25T16:00:00-07:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-09-23T09:00:00-07:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 5,
+    "fields": {
+      "number": 5,
+      "description": "Week 5",
+      "start_date": "2025-10-02",
+      "end_date": "2025-10-06",
+      "deadline": "2025-10-02T16:00:00-07:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-09-30T09:00:00-07:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 6,
+    "fields": {
+      "number": 6,
+      "description": "Week 6",
+      "start_date": "2025-10-09",
+      "end_date": "2025-10-13",
+      "deadline": "2025-10-09T16:00:00-07:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-10-07T09:00:00-07:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 7,
+    "fields": {
+      "number": 7,
+      "description": "Week 7",
+      "start_date": "2025-10-16",
+      "end_date": "2025-10-20",
+      "deadline": "2025-10-16T16:00:00-07:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-10-14T09:00:00-07:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 8,
+    "fields": {
+      "number": 8,
+      "description": "Week 8",
+      "start_date": "2025-10-23",
+      "end_date": "2025-10-27",
+      "deadline": "2025-10-23T16:00:00-07:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-10-21T09:00:00-07:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 9,
+    "fields": {
+      "number": 9,
+      "description": "Week 9",
+      "start_date": "2025-10-30",
+      "end_date": "2025-11-03",
+      "deadline": "2025-10-30T16:00:00-07:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-10-28T09:00:00-07:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 10,
+    "fields": {
+      "number": 10,
+      "description": "Week 10",
+      "start_date": "2025-11-06",
+      "end_date": "2025-11-10",
+      "deadline": "2025-11-06T16:00:00-08:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-11-04T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 11,
+    "fields": {
+      "number": 11,
+      "description": "Week 11",
+      "start_date": "2025-11-13",
+      "end_date": "2025-11-17",
+      "deadline": "2025-11-13T16:00:00-08:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-11-11T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 12,
+    "fields": {
+      "number": 12,
+      "description": "Week 12 - Thanksgiving",
+      "start_date": "2025-11-20",
+      "end_date": "2025-11-24",
+      "deadline": "2025-11-20T16:00:00-08:00",
+      "is_regular_season": true,
+      "is_double": true,
+      "reset_pool": false,
+      "reminder_time": "2025-11-18T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 13,
+    "fields": {
+      "number": 13,
+      "description": "Week 13",
+      "start_date": "2025-11-27",
+      "end_date": "2025-12-01",
+      "deadline": "2025-11-27T16:00:00-08:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-11-25T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 14,
+    "fields": {
+      "number": 14,
+      "description": "Week 14",
+      "start_date": "2025-12-04",
+      "end_date": "2025-12-08",
+      "deadline": "2025-12-04T16:00:00-08:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-12-02T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 15,
+    "fields": {
+      "number": 15,
+      "description": "Week 15",
+      "start_date": "2025-12-11",
+      "end_date": "2025-12-15",
+      "deadline": "2025-12-11T16:00:00-08:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-12-09T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 16,
+    "fields": {
+      "number": 16,
+      "description": "Week 16",
+      "start_date": "2025-12-18",
+      "end_date": "2025-12-22",
+      "deadline": "2025-12-18T16:00:00-08:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-12-16T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 17,
+    "fields": {
+      "number": 17,
+      "description": "Week 17",
+      "start_date": "2025-12-25",
+      "end_date": "2025-12-29",
+      "deadline": "2025-12-25T16:00:00-08:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-12-23T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 18,
+    "fields": {
+      "number": 18,
+      "description": "Week 18",
+      "start_date": "2026-01-01",
+      "end_date": "2026-01-04",
+      "deadline": "2026-01-01T16:00:00-08:00",
+      "is_regular_season": true,
+      "is_double": false,
+      "reset_pool": false,
+      "reminder_time": "2025-12-30T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 19,
+    "fields": {
+      "number": 19,
+      "description": "Wild Card Round",
+      "start_date": "2026-01-08",
+      "end_date": "2026-01-11",
+      "deadline": "2026-01-08T16:00:00-08:00",
+      "is_regular_season": false,
+      "is_double": true,
+      "reset_pool": true,
+      "reminder_time": "2026-01-06T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 20,
+    "fields": {
+      "number": 20,
+      "description": "Divisional Round",
+      "start_date": "2026-01-15",
+      "end_date": "2026-01-18",
+      "deadline": "2026-01-15T16:00:00-08:00",
+      "is_regular_season": false,
+      "is_double": true,
+      "reset_pool": false,
+      "reminder_time": "2026-01-13T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 21,
+    "fields": {
+      "number": 21,
+      "description": "Conference Championships",
+      "start_date": "2026-01-22",
+      "end_date": "2026-01-25",
+      "deadline": "2026-01-22T16:00:00-08:00",
+      "is_regular_season": false,
+      "is_double": true,
+      "reset_pool": false,
+      "reminder_time": "2026-01-20T09:00:00-08:00"
+    }
+  },
+  {
+    "model": "pool.week",
+    "pk": 22,
+    "fields": {
+      "number": 22,
+      "description": "Super Bowl",
+      "start_date": "2026-02-05",
+      "end_date": "2026-02-08",
+      "deadline": "2026-02-05T16:00:00-08:00",
+      "is_regular_season": false,
+      "is_double": true,
+      "reset_pool": false,
+      "reminder_time": "2026-02-03T09:00:00-08:00"
+    }
+  }
+]

@@ -1,0 +1,386 @@
+[
+  {
+    "model": "pool.team",
+    "pk": 1,
+    "fields": {
+      "name": "Cardinals",
+      "city": "Arizona",
+      "abbreviation": "ARI",
+      "conference": "NFC",
+      "division": "West",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 2,
+    "fields": {
+      "name": "Falcons",
+      "city": "Atlanta",
+      "abbreviation": "ATL",
+      "conference": "NFC",
+      "division": "South",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 3,
+    "fields": {
+      "name": "Ravens",
+      "city": "Baltimore",
+      "abbreviation": "BAL",
+      "conference": "AFC",
+      "division": "North",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 4,
+    "fields": {
+      "name": "Bills",
+      "city": "Buffalo",
+      "abbreviation": "BUF",
+      "conference": "AFC",
+      "division": "East",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 5,
+    "fields": {
+      "name": "Panthers",
+      "city": "Carolina",
+      "abbreviation": "CAR",
+      "conference": "NFC",
+      "division": "South",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 6,
+    "fields": {
+      "name": "Bears",
+      "city": "Chicago",
+      "abbreviation": "CHI",
+      "conference": "NFC",
+      "division": "North",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 7,
+    "fields": {
+      "name": "Bengals",
+      "city": "Cincinnati",
+      "abbreviation": "CIN",
+      "conference": "AFC",
+      "division": "North",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 8,
+    "fields": {
+      "name": "Browns",
+      "city": "Cleveland",
+      "abbreviation": "CLE",
+      "conference": "AFC",
+      "division": "North",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 9,
+    "fields": {
+      "name": "Cowboys",
+      "city": "Dallas",
+      "abbreviation": "DAL",
+      "conference": "NFC",
+      "division": "East",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 10,
+    "fields": {
+      "name": "Broncos",
+      "city": "Denver",
+      "abbreviation": "DEN",
+      "conference": "AFC",
+      "division": "West",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 11,
+    "fields": {
+      "name": "Lions",
+      "city": "Detroit",
+      "abbreviation": "DET",
+      "conference": "NFC",
+      "division": "North",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 12,
+    "fields": {
+      "name": "Packers",
+      "city": "Green Bay",
+      "abbreviation": "GB",
+      "conference": "NFC",
+      "division": "North",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 13,
+    "fields": {
+      "name": "Texans",
+      "city": "Houston",
+      "abbreviation": "HOU",
+      "conference": "AFC",
+      "division": "South",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 14,
+    "fields": {
+      "name": "Colts",
+      "city": "Indianapolis",
+      "abbreviation": "IND",
+      "conference": "AFC",
+      "division": "South",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 15,
+    "fields": {
+      "name": "Jaguars",
+      "city": "Jacksonville",
+      "abbreviation": "JAX",
+      "conference": "AFC",
+      "division": "South",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 16,
+    "fields": {
+      "name": "Chiefs",
+      "city": "Kansas City",
+      "abbreviation": "KC",
+      "conference": "AFC",
+      "division": "West",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 17,
+    "fields": {
+      "name": "Raiders",
+      "city": "Las Vegas",
+      "abbreviation": "LV",
+      "conference": "AFC",
+      "division": "West",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 18,
+    "fields": {
+      "name": "Chargers",
+      "city": "Los Angeles",
+      "abbreviation": "LAC",
+      "conference": "AFC",
+      "division": "West",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 19,
+    "fields": {
+      "name": "Rams",
+      "city": "Los Angeles",
+      "abbreviation": "LAR",
+      "conference": "NFC",
+      "division": "West",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 20,
+    "fields": {
+      "name": "Dolphins",
+      "city": "Miami",
+      "abbreviation": "MIA",
+      "conference": "AFC",
+      "division": "East",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 21,
+    "fields": {
+      "name": "Vikings",
+      "city": "Minnesota",
+      "abbreviation": "MIN",
+      "conference": "NFC",
+      "division": "North",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 22,
+    "fields": {
+      "name": "Patriots",
+      "city": "New England",
+      "abbreviation": "NE",
+      "conference": "AFC",
+      "division": "East",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 23,
+    "fields": {
+      "name": "Saints",
+      "city": "New Orleans",
+      "abbreviation": "NO",
+      "conference": "NFC",
+      "division": "South",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 24,
+    "fields": {
+      "name": "Giants",
+      "city": "New York",
+      "abbreviation": "NYG",
+      "conference": "NFC",
+      "division": "East",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 25,
+    "fields": {
+      "name": "Jets",
+      "city": "New York",
+      "abbreviation": "NYJ",
+      "conference": "AFC",
+      "division": "East",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 26,
+    "fields": {
+      "name": "Eagles",
+      "city": "Philadelphia",
+      "abbreviation": "PHI",
+      "conference": "NFC",
+      "division": "East",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 27,
+    "fields": {
+      "name": "Steelers",
+      "city": "Pittsburgh",
+      "abbreviation": "PIT",
+      "conference": "AFC",
+      "division": "North",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 28,
+    "fields": {
+      "name": "49ers",
+      "city": "San Francisco",
+      "abbreviation": "SF",
+      "conference": "NFC",
+      "division": "West",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 29,
+    "fields": {
+      "name": "Seahawks",
+      "city": "Seattle",
+      "abbreviation": "SEA",
+      "conference": "NFC",
+      "division": "West",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 30,
+    "fields": {
+      "name": "Buccaneers",
+      "city": "Tampa Bay",
+      "abbreviation": "TB",
+      "conference": "NFC",
+      "division": "South",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 31,
+    "fields": {
+      "name": "Titans",
+      "city": "Tennessee",
+      "abbreviation": "TEN",
+      "conference": "AFC",
+      "division": "South",
+      "logo_url": ""
+    }
+  },
+  {
+    "model": "pool.team",
+    "pk": 32,
+    "fields": {
+      "name": "Commanders",
+      "city": "Washington",
+      "abbreviation": "WAS",
+      "conference": "NFC",
+      "division": "East",
+      "logo_url": ""
+    }
+  }
+]

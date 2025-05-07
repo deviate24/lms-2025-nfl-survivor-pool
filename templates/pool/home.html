@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - LMS 2025{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mb-4">Welcome to LMS 2025</h1>
+        
+        {% if user.is_authenticated %}
+            {% if user_pools %}
+                <h2 class="mb-3">Your Pools</h2>
+                <div class="row">
+                    {% for pool in user_pools %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">{{ pool.name }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">{{ pool.description }}</p>
+                                    <p><strong>Season:</strong> {{ pool.year }}</p>
+                                    
+                                    {% if current_week %}
+                                        <p><strong>Current Week:</strong> {{ current_week }}</p>
+                                        <p><strong>Deadline:</strong> {{ current_week.deadline|date:"l, F j, Y, g:i A T" }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'pool_detail' pool.id %}" class="btn btn-primary">View Pool</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <p>You are not currently participating in any pools.</p>
+                    <p>Please contact the administrator to join a pool.</p>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="jumbotron">
+                <h2>NFL Survivor Pool 2025</h2>
+                <p class="lead">
+                    Welcome to the Last Man Standing NFL Survivor Pool for the 2025 season!
+                </p>
+                <p>
+                    In a survivor pool, each participant picks one NFL team each week. If your team wins, you survive to the next week.
+                    If your team loses, you're eliminated. The catch? You can only use each team once during the season!
+                </p>
+                <p>
+                    <a class="btn btn-primary btn-lg" href="{% url 'register' %}" role="button">Sign Up Now</a>
+                    <a class="btn btn-outline-secondary btn-lg" href="{% url 'login' %}" role="button">Login</a>
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
