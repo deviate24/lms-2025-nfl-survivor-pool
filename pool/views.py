@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Count, Q
+from .models import Entry, Pick, Week, Pool, PoolWeekSettings
 
 from .models import Pool, Entry, Pick, Week, Team
 from .forms import PickForm, DoublePickForm, QuickPickForm
@@ -108,6 +109,16 @@ def entry_detail(request, entry_id):
     # Get available teams
     available_teams = entry.get_available_teams(current_week)
     
+    # Get pool-specific settings for current week
+    is_double_pick = False
+    if current_week:
+        week_settings = PoolWeekSettings.objects.filter(
+            pool=entry.pool,
+            week=current_week
+        ).first()
+        if week_settings:
+            is_double_pick = week_settings.is_double
+    
     context = {
         'entry': entry,
         'picks': picks,
@@ -115,6 +126,7 @@ def entry_detail(request, entry_id):
         'has_current_pick': has_current_pick,
         'current_week_picks': current_week_picks,
         'available_teams': available_teams,
+        'is_double_pick': is_double_pick,
     }
     
     return render(request, 'pool/entry_detail.html', context)
@@ -133,16 +145,24 @@ def make_pick(request, entry_id):
         return redirect('home')
     
     # Get current week
+    today = timezone.now().date()
     current_week = Week.objects.filter(
-        start_date__lte=timezone.now().date(),
-        end_date__gte=timezone.now().date()
+        start_date__lte=today,
+        end_date__gte=today
     ).first()
     
     # If no current week, get the next upcoming week
     if not current_week:
         current_week = Week.objects.filter(
-            start_date__gt=timezone.now().date()
+            start_date__gt=today
         ).order_by('start_date').first()
+    
+    # If still no current week, fallback to the first week in the database
+    if not current_week:
+        current_week = Week.objects.all().order_by('number').first()
+        
+    # Debug info
+    print(f"Selected Week: {current_week}")
     
     # Check if deadline has passed
     if current_week.is_past_deadline():
@@ -154,8 +174,14 @@ def make_pick(request, entry_id):
         messages.error(request, "This entry has been eliminated and cannot make picks.")
         return redirect('entry_detail', entry_id=entry.id)
     
+    # Get pool-specific settings for this week
+    week_settings = PoolWeekSettings.objects.filter(pool=entry.pool, week=current_week).first()
+    if not week_settings:
+        messages.error(request, "Week settings not found for this pool.")
+        return redirect('entry_detail', entry_id=entry.id)
+    
     # Check if this is a double-pick week
-    if current_week.is_double:
+    if week_settings.is_double:
         # Get existing picks for this week
         existing_picks = Pick.objects.filter(entry=entry, week=current_week)
         
@@ -190,12 +216,47 @@ def make_pick(request, entry_id):
             existing_pick = None
         
         if request.method == 'POST':
-            form = PickForm(request.POST, instance=existing_pick, entry=entry, week=current_week)
+            # Handle the form submission
+            if existing_pick:
+                # If editing existing pick, use that instance
+                form = PickForm(request.POST, instance=existing_pick, entry=entry, week=current_week)
+            else:
+                # If creating new pick, start from scratch but with entry and week set
+                form = PickForm(request.POST, entry=entry, week=current_week)
             
             if form.is_valid():
-                form.save()
-                messages.success(request, f"Your pick for Week {current_week.number} has been saved.")
-                return redirect('entry_detail', entry_id=entry.id)
+                try:
+                    # Get the team from the cleaned data
+                    team = form.cleaned_data['team']
+                    
+                    # Delete any existing picks for this entry and week to avoid duplicates
+                    Pick.objects.filter(entry=entry, week=current_week).delete()
+                    
+                    # For entries created by admin, we need to be very explicit
+                    # First, delete any existing picks to avoid duplicates
+                    Pick.objects.filter(entry=entry, week=current_week).delete()
+                    
+                    # Create a new pick directly instead of using form.save
+                    # This ensures all fields are properly set
+                    pick = Pick(
+                        entry=entry,  # Explicitly set the entry
+                        week=current_week,
+                        team=team
+                    )
+                    pick.save()
+                    
+                    messages.success(request, f'Successfully saved your pick of {team} for Week {current_week.number}')
+                    return redirect('entry_detail', entry_id=entry.id)
+                except ValidationError as e:
+                    messages.error(request, str(e))
+            # Let the form handle displaying errors
+            context = {
+                'form': form,
+                'entry': entry,
+                'week': current_week,
+                'is_double_pick': week_settings.is_double if week_settings else False,
+            }
+            return render(request, 'pool/make_pick.html', context)
         else:
             form = PickForm(instance=existing_pick, entry=entry, week=current_week)
     
@@ -203,7 +264,7 @@ def make_pick(request, entry_id):
         'form': form,
         'entry': entry,
         'week': current_week,
-        'is_double_pick': current_week.is_double,
+        'is_double_pick': week_settings.is_double if week_settings else False,
     }
     
     return render(request, 'pool/make_pick.html', context)

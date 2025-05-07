@@ -19,6 +19,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            -webkit-text-size-adjust: 100%;
         }
         
         .navbar {
@@ -28,6 +29,7 @@
         .btn-primary {
             background-color: var(--turf-green);
             border-color: var(--turf-green);
+            min-height: 44px; /* Touch-friendly button size */
         }
         
         .btn-primary:hover {
@@ -37,6 +39,7 @@
         
         .main-content {
             flex: 1;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
         
         footer {
@@ -44,11 +47,45 @@
             color: white;
             padding: 1rem 0;
             margin-top: auto;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         
         .card-header {
             background-color: var(--navy-blue);
             color: white;
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+
+            .form-select, .form-control {
+                font-size: 16px; /* Prevent iOS zoom on focus */
+                min-height: 44px; /* Touch-friendly size */
+            }
+
+            .nav-link {
+                padding: 12px 15px; /* Larger touch targets */
+            }
+
+            .card {
+                border-radius: 10px;
+                margin-bottom: 1rem;
+            }
+
+            .alert {
+                border-radius: 10px;
+                margin-bottom: 1rem;
+            }
+
+            /* Quick pick buttons for mobile */
+            .quick-pick-btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
         }
         
         .alert-success {

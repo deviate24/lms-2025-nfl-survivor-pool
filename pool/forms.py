@@ -18,8 +18,31 @@ class PickForm(forms.ModelForm):
         self.entry = kwargs.pop('entry', None)
         self.week = kwargs.pop('week', None)
         
+        # If we have an instance, ensure entry and week are set
+        if 'instance' in kwargs and kwargs['instance']:
+            if not self.entry:
+                self.entry = kwargs['instance'].entry
+            if not self.week:
+                self.week = kwargs['instance'].week
+                
         super().__init__(*args, **kwargs)
         
+        # Initialize the instance if it exists
+        # This is to make sure the entry is passed properly to the model instance
+        if hasattr(self, 'instance') and self.instance:
+            if self.entry:
+                self.instance.entry = self.entry
+            if self.week:
+                self.instance.week = self.week
+        
+        # Initialize the team field with all teams first
+        self.fields['team'].queryset = Team.objects.all()
+        self.fields['team'].widget.attrs.update({
+            'class': 'form-select',
+            'aria-label': 'Select team',
+        })
+        
+        # If we have both entry and week, we can filter available teams
         if self.entry and self.week:
             # Get available teams for this entry
             available_teams = self.entry.get_available_teams(self.week)
@@ -27,42 +50,49 @@ class PickForm(forms.ModelForm):
             # Update the team field to only show available teams
             self.fields['team'].queryset = available_teams
             self.fields['team'].label = f"Select your team for Week {self.week.number}"
-            self.fields['team'].widget.attrs.update({
-                'class': 'form-select',
-                'aria-label': 'Select team',
-            })
+        else:
+            self.fields['team'].label = "Select team"
     
     def clean(self):
         cleaned_data = super().clean()
+        
+        # Check if entry is set (this should happen in __init__, but we'll double-check here)
+        if not self.entry:
+            self.add_error(None, "Entry is required")
+            return cleaned_data
+            
+        # Check if week is set
+        if not self.week:
+            self.add_error(None, "Week is required")
+            return cleaned_data
+            
+        # Check if team is selected
         team = cleaned_data.get('team')
+        if not team:
+            self.add_error('team', "Please select a team.")
+            return cleaned_data
+            
+        # Create a temporary Pick instance for validation
+        temp_pick = Pick(entry=self.entry, week=self.week, team=team)
         
-        if self.week and self.week.is_past_deadline():
-            raise ValidationError("The deadline for this week has passed.")
-        
-        if self.entry and not self.entry.is_alive:
-            raise ValidationError("This entry has been eliminated and cannot make picks.")
-        
-        if team and self.entry and not self.week.reset_pool:
-            # Check if team was already used by this entry
-            used_teams = self.entry.get_used_teams()
-            if team in used_teams and not self.instance.pk:
-                raise ValidationError(f"You have already used {team} in a previous week.")
-        
+        try:
+            temp_pick.clean()
+        except ValidationError as e:
+            self.add_error(None, str(e))
+            
         return cleaned_data
     
     def save(self, commit=True):
         instance = super().save(commit=False)
         
         # Always set these fields, they're required for a valid Pick
-        if self.entry:
-            instance.entry = self.entry
-        else:
+        if not self.entry:
             raise ValueError("Entry must be provided to save a Pick")
+        instance.entry = self.entry
             
-        if self.week:
-            instance.week = self.week
-        else:
+        if not self.week:
             raise ValueError("Week must be provided to save a Pick")
+        instance.week = self.week
         
         if commit:
             instance.save()

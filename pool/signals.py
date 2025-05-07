@@ -5,7 +5,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
-from .models import Pick
+from .models import Pick, PoolWeekSettings
 
 
 @receiver(post_save, sender=Pick)
@@ -18,6 +18,17 @@ def send_confirmation_email(sender, instance, created, **kwargs):
         # Get the user's email
         user_email = instance.entry.user.email
         
+        # Get the pool-specific settings for this week
+        week_settings = PoolWeekSettings.objects.filter(
+            pool=instance.entry.pool,
+            week=instance.week
+        ).first()
+        
+        # Default to False if no settings are found
+        is_double_pick = False
+        if week_settings:
+            is_double_pick = week_settings.is_double
+        
         # Prepare the email content
         context = {
             'user': instance.entry.user,
@@ -25,7 +36,7 @@ def send_confirmation_email(sender, instance, created, **kwargs):
             'pick': instance,
             'week': instance.week,
             'team': instance.team,
-            'is_double_pick': instance.week.is_double,
+            'is_double_pick': is_double_pick,
         }
         
         # Render the HTML email template

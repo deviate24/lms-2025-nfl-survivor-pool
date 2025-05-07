@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Team, Week, Pool, Entry, Pick, AuditLog
+from .models import Team, Week, Pool, Entry, Pick, AuditLog, PoolWeekSettings
 
 
 @admin.register(Team)
@@ -11,23 +11,49 @@ class TeamAdmin(admin.ModelAdmin):
 
 @admin.register(Week)
 class WeekAdmin(admin.ModelAdmin):
-    list_display = ('number', 'description', 'start_date', 'end_date', 'deadline', 'is_double', 'reset_pool')
-    list_filter = ('is_regular_season', 'is_double', 'reset_pool')
+    list_display = ('number', 'description', 'start_date', 'end_date', 'deadline', 'reset_pool')
+    list_filter = ('is_regular_season', 'reset_pool')
     search_fields = ('number', 'description')
 
+
+class PoolWeekSettingsInline(admin.TabularInline):
+    model = PoolWeekSettings
+    extra = 0
+    max_num = 0  # Don't allow adding new ones manually
 
 @admin.register(Pool)
 class PoolAdmin(admin.ModelAdmin):
     list_display = ('name', 'year', 'created_by', 'created_at', 'is_active')
     list_filter = ('year', 'is_active')
     search_fields = ('name', 'description')
+    inlines = [PoolWeekSettingsInline]
+    
+    def save_model(self, request, obj, form, change):
+        is_new = not obj.pk
+        super().save_model(request, obj, form, change)
+        
+        if is_new:
+            # Only create settings for a new pool
+            weeks = Week.objects.all()
+            for week in weeks:
+                PoolWeekSettings.objects.create(
+                    pool=obj,
+                    week=week,
+                    is_double=False
+                )
 
+
+class PickInline(admin.TabularInline):
+    model = Pick
+    extra = 1
+    fields = ('week', 'team', 'result')
 
 @admin.register(Entry)
 class EntryAdmin(admin.ModelAdmin):
     list_display = ('entry_name', 'pool', 'user', 'is_alive', 'eliminated_in_week')
     list_filter = ('pool', 'is_alive')
     search_fields = ('entry_name', 'user__username', 'user__email')
+    inlines = [PickInline]
 
 
 @admin.register(Pick)

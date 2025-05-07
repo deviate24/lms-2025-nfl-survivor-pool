@@ -39,7 +39,7 @@ class Week(models.Model):
     end_date = models.DateField()  # Last day of the week
     deadline = models.DateTimeField()  # Deadline for picks (Thursday 4PM PT)
     is_regular_season = models.BooleanField(default=True)  # Regular season or playoffs
-    is_double = models.BooleanField(default=False)  # Whether this is a double-pick week
+    # is_double moved to PoolWeekSettings
     reset_pool = models.BooleanField(default=False)  # Whether to reset used teams (for playoffs)
     reminder_time = models.DateTimeField(null=True, blank=True)  # When to send reminders
     
@@ -63,6 +63,27 @@ class Week(models.Model):
         return self.start_date > timezone.now().date()
 
 
+class PoolWeekSettings(models.Model):
+    """
+    Represents pool-specific settings for each week.
+    This allows customizing which weeks are double-pick weeks per pool.
+    """
+    pool = models.ForeignKey('Pool', on_delete=models.CASCADE, related_name='week_settings')
+    week = models.ForeignKey('Week', on_delete=models.CASCADE, related_name='pool_settings')
+    is_double = models.BooleanField(default=False)  # Whether this is a double-pick week for this pool
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['pool', 'week'],
+                name='unique_week_settings_per_pool'
+            )
+        ]
+    
+    def __str__(self):
+        return f"{self.pool.name} - Week {self.week.number} Settings"
+
+
 class Pool(models.Model):
     """
     Represents a survivor pool contest.
@@ -73,6 +94,7 @@ class Pool(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)  # Whether the pool is active
+    weeks = models.ManyToManyField('Week', through='PoolWeekSettings', related_name='pools')
     
     def __str__(self):
         return f"{self.name} ({self.year})"
@@ -167,19 +189,70 @@ class Pick(models.Model):
     
     def clean(self):
         """Validate pick rules"""
-        # Check if past deadline
+        # First, let's handle the week
+        if not hasattr(self, 'week') or not self.week:
+            # Get current week
+            today = timezone.now().date()
+            current_week = self._meta.model.week.field.related_model.objects.filter(
+                start_date__lte=today,
+                end_date__gte=today
+            ).first()
+            
+            # If no current week, get the next upcoming week
+            if not current_week:
+                current_week = self._meta.model.week.field.related_model.objects.filter(
+                    start_date__gt=today
+                ).order_by('start_date').first()
+            
+            # If still no week, fallback to the first week
+            if not current_week:
+                current_week = self._meta.model.week.field.related_model.objects.order_by('number').first()
+                
+            if current_week:
+                self.week = current_week
+            else:
+                raise ValidationError("Week is required and no valid weeks found in the system")
+            
+        if not hasattr(self, 'entry') or not self.entry:
+            # For clean method, we must have an entry
+            # Just set a default error that the form will override with its own validation
+            raise ValidationError("Entry is required")
+            
+        if not hasattr(self, 'team') or not self.team:
+            raise ValidationError("Team is required")
+        
+        # Now we can safely check rules
         if self.week.is_past_deadline():
             raise ValidationError("Cannot make or change picks after the deadline")
         
-        # Check if entry is already eliminated
         if not self.entry.is_alive:
             raise ValidationError("This entry has been eliminated and cannot make picks")
+        
+        # Get the pool-specific settings for this week
+        week_settings = PoolWeekSettings.objects.filter(pool=self.entry.pool, week=self.week).first()
+        if not week_settings:
+            raise ValidationError("Week settings not found for this pool")
         
         # Check if team was already used by this entry (unless reset_pool)
         if not self.week.reset_pool:
             used_teams = self.entry.get_used_teams()
             if self.team in used_teams and not self.pk:  # Allow editing existing pick
                 raise ValidationError(f"You have already used {self.team} in a previous week")
+        
+        # Check if this is a double-pick week
+        if week_settings.is_double:
+            # Count existing picks for this week
+            existing_picks = Pick.objects.filter(entry=self.entry, week=self.week)
+            if self.pk:  # If editing, exclude current pick
+                existing_picks = existing_picks.exclude(pk=self.pk)
+            
+            if existing_picks.count() >= 2:
+                raise ValidationError("You have already made both picks for this double-pick week")
+        else:
+            # For single-pick weeks, we handle managing picks in the view
+            # We'll allow changing picks before the deadline but ensure there's only one active pick
+            # This validation step is no longer needed as we delete any existing picks when saving a new one
+            pass
     
     def save(self, *args, **kwargs):
         self.clean()
