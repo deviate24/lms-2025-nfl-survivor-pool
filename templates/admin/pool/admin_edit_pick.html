@@ -1,0 +1,79 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label='pool' %}">Pool</a>
+&rsaquo; <a href="{% url 'admin:pool_entry_changelist' %}">Entries</a>
+&rsaquo; <a href="{% url 'admin:pool_entry_change' pick.entry.pk %}">{{ pick.entry.entry_name }}</a>
+&rsaquo; {% translate 'Edit Pick' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{{ title }}</h1>
+    
+    <div class="module">
+        <div class="form-row">
+            <p>
+                <strong>Entry:</strong> {{ pick.entry.entry_name }}<br>
+                <strong>Week:</strong> {{ pick.week }}<br>
+                <strong>Current Team:</strong> {{ pick.team }}<br>
+                <strong>Current Result:</strong> {{ pick.get_result_display }}<br>
+                <strong>Created At:</strong> {{ pick.created_at }}
+            </p>
+        </div>
+    </div>
+    
+    <form action="" method="post">
+        {% csrf_token %}
+        <div>
+            <fieldset class="module aligned">
+                <div class="form-row">
+                    <div>
+                        <label for="team">Team:</label>
+                        <select name="team" required>
+                            <option value="">---------</option>
+                            {% for team in teams %}
+                                <option value="{{ team.id }}" {% if team.id == pick.team.id %}selected{% endif %}>
+                                    {{ team.city }} {{ team.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div>
+                        <label for="result">Result:</label>
+                        <select name="result" required>
+                            <option value="">---------</option>
+                            {% for value, display in result_choices %}
+                                <option value="{{ value }}" {% if value == pick.result %}selected{% endif %}>
+                                    {{ display }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <p class="help" style="color: #d00;">
+                        <strong>Warning:</strong> This action will bypass all validation checks, including deadline and team-usage restrictions.
+                        Use this only to correct erroneous entries.
+                    </p>
+                </div>
+            </fieldset>
+            
+            <div class="submit-row">
+                <input type="submit" value="Save Changes" class="default">
+                <a href="{% url 'admin:pool_entry_change' pick.entry.pk %}" class="button" style="background-color: #6c757d;">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

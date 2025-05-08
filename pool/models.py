@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.contrib.admin.options import ModelAdmin
 from django.db.models import UniqueConstraint
 
 
@@ -55,8 +56,13 @@ class Week(models.Model):
         today = timezone.now().date()
         return self.start_date <= today <= self.end_date
     
-    def is_past_deadline(self):
+    def is_past_deadline(self, for_admin=False):
         """Check if the pick deadline has passed"""
+        # If this is for admin use, pretend the deadline hasn't passed
+        if for_admin:
+            return False
+            
+        # Normal deadline check
         return timezone.now() > self.deadline
     
     def is_future(self):
@@ -188,8 +194,21 @@ class Pick(models.Model):
     def __str__(self):
         return f"{self.entry.entry_name} picked {self.team} for {self.week}"
     
-    def clean(self):
+    def clean(self, *args, **kwargs):
         """Validate pick rules"""
+        # Check if this is a superadmin request (from admin interface)   
+        is_superadmin = kwargs.pop('is_superadmin', False)
+        
+        # Check if we're in the admin interface (direct from request or through stack inspection)
+        admin_request = kwargs.pop('admin_request', False)
+        
+        # This is a more robust way to detect admin usage
+        if not admin_request:
+            import inspect
+            admin_frames = [frame for frame in inspect.stack() 
+                           if '/admin/' in frame.filename if hasattr(frame, 'filename')]
+            admin_request = len(admin_frames) > 0
+        
         # First, let's handle the week
         if not hasattr(self, 'week') or not self.week:
             # Get current week
@@ -222,12 +241,15 @@ class Pick(models.Model):
         if not hasattr(self, 'team') or not self.team:
             raise ValidationError("Team is required")
         
-        # Now we can safely check rules
-        if self.week.is_past_deadline():
-            raise ValidationError("Cannot make or change picks after the deadline")
-        
-        if not self.entry.is_alive:
-            raise ValidationError("This entry has been eliminated and cannot make picks")
+        # Superadmins and admin requests bypass deadline and elimination checks
+        if not (is_superadmin or admin_request):
+            # Only regular users are restricted by deadline
+            if self.week.is_past_deadline():
+                raise ValidationError("Cannot make or change picks after the deadline")
+            
+            # Only regular users are restricted by elimination status
+            if not self.entry.is_alive:
+                raise ValidationError("This entry has been eliminated and cannot make picks")
         
         # Get the pool-specific settings for this week
         week_settings = PoolWeekSettings.objects.filter(pool=self.entry.pool, week=self.week).first()
@@ -256,9 +278,18 @@ class Pick(models.Model):
             pass
     
     def save(self, *args, **kwargs):
-        self.clean()
+        # Check if this is a superadmin or admin save
+        is_superadmin = kwargs.pop('is_superadmin', False)
+        admin_request = kwargs.pop('admin_request', False)
+        
+        # Pass the flags to clean
+        self.clean(is_superadmin=is_superadmin, admin_request=admin_request)
+        
+        # Save the model
         super().save(*args, **kwargs)
-        # Signal will handle sending confirmation email
+        
+        # Signal will handle sending confirmation email for regular users
+        # but not for admin actions
 
 
 class WeeklyResult(models.Model):
