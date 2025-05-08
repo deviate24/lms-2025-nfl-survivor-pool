@@ -3,59 +3,250 @@
 {% block title %}Home - LMS 2025{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <h1 class="mb-4">Welcome to LMS 2025</h1>
+{% load static %}
+<style>
+    /* Reset any potential element causing overflow */
+    * {
+        box-sizing: border-box;
+    }
+    
+    /* Hide horizontal overflow on all elements */
+    body, html, .container, .container-fluid, .row {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .home-container {
+        position: relative;
+        height: calc(100vh - 130px); /* Fixed height to match viewport */
+        width: 100%;
+        padding: 1rem 0;
+        overflow: auto; /* Add scroll only if needed within container */
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+    
+    .background-image {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('{% static "images/footballfield.png" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.85; /* Adjust for better text readability */
+        z-index: -1; /* Place behind content */
+        overflow: hidden;
+    }
+    
+    /* Fix horizontal scroll issue */
+    .home-container, .row, .col-md-12 {
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+        overflow-x: hidden;
+    }
+    
+    .content-overlay {
+        background-color: rgba(0, 0, 0, 0.6); /* Dark overlay for better text contrast */
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        color: white;
+    }
+    
+    .page-title, .section-title {
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+        margin-bottom: 15px;
+    }
+    
+    .page-title {
+        margin-top: 0;
+    }
+    
+    /* Remove pool-card class as we won't be using it */
+    
+    /* Grid layout for pools */
+    .pool-grid {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: -10px;
+        margin-right: -10px;
+    }
+    
+    /* Ensure cards maintain consistent size and spacing */
+    .pool-grid > div {
+        padding: 0 10px;
+    }
+    
+    /* Mobile responsiveness for pool grid */
+    @media (max-width: 768px) {
+        .pool-grid > div {
+            width: 100%;
+        }
         
-        {% if user.is_authenticated %}
-            {% if user_pools %}
-                <h2 class="mb-3">Your Pools</h2>
-                <div class="row">
-                    {% for pool in user_pools %}
-                        <div class="col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title mb-0">{{ pool.name }}</h5>
+        .pool-card {
+            min-height: 250px;
+        }
+    }
+    
+    /* For very large screens, limit maximum columns */
+    @media (min-width: 1400px) {
+        .pool-grid > div.col-xl-4 {
+            flex: 0 0 33.333333%;
+            max-width: 33.333333%;
+        }
+    }
+    
+    /* Ensure all card content is consistent */
+    .pool-card .card {
+        flex: 1;
+        margin-bottom: 0;
+    }
+    
+    /* Ensure view pool button is at bottom */
+    .pool-card .btn-container {
+        margin-top: auto;
+    }
+    
+    /* Compact card content */
+    .pool-card p {
+        margin-bottom: 0.5rem;
+    }
+    
+    .card {
+        background-color: rgba(255, 255, 255, 0.9) !important; /* Semi-transparent cards */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Optimize card body */
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Fix viewport height calculation for different devices */
+    @media (min-height: 800px) {
+        .home-container {
+            height: calc(100vh - 150px);
+        }
+    }
+    
+    @media (max-height: 650px) {
+        .home-container {
+            height: calc(100vh - 100px);
+        }
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        .content-overlay, .pool-card {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .home-container {
+            padding: 1rem 0;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+        
+        .card {
+            margin-bottom: 10px;
+        }
+        
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="background-image"></div>
+
+<div class="home-container">
+    <div class="row">
+        <div class="col-md-12 text-center mb-2">
+            <h1 class="page-title">Welcome to LMS 2025</h1>
+            
+            {% if user.is_authenticated %}
+                {% if user_pools %}
+                    <h2 class="section-title">Your Pools</h2>
+                    <div style="position: relative; width: 100%; height: 420px; overflow: visible;">
+                        {% for pool in user_pools %}
+                            {% if forloop.counter == 1 %}
+                            <div style="position: absolute; top: 0; left: 20%; width: 400px; max-width: 90%; background-color: rgba(0,0,0,0.7); border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); padding: 0;">
+                            {% else %}
+                            <div style="position: absolute; top: 0; left: 55%; width: 400px; max-width: 90%; background-color: rgba(0,0,0,0.7); border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); padding: 0;">
+                            {% endif %}
+                                <div style="background-color: #1e3a8a; color: white; padding: 10px; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                                    <h5 style="margin: 0; font-weight: 600;">{{ pool.name }}</h5>
                                 </div>
-                                <div class="card-body">
-                                    <p class="card-text">{{ pool.description }}</p>
-                                    <p><strong>Season:</strong> {{ pool.year }}</p>
+                                <div style="padding: 15px; color: white;">
+                                    <p style="margin-bottom: 5px;">{{ pool.description }}</p>
+                                    <p style="margin-bottom: 5px;"><strong>Season:</strong> {{ pool.year }}</p>
                                     
                                     {% if current_week %}
-                                        <p><strong>Current Week:</strong> {{ current_week }}</p>
-                                        <p><strong>Deadline:</strong> {{ current_week.deadline|date:"l, F j, Y, g:i A T" }}</p>
+                                        <p style="margin-bottom: 5px;"><strong>Current Week:</strong> {{ current_week }}</p>
+                                        <p style="margin-bottom: 15px;"><strong>Deadline:</strong> {{ current_week.deadline|date:"l, F j, Y, g:i A T" }}</p>
                                     {% endif %}
                                     
-                                    <div class="d-grid gap-2">
-                                        <a href="{% url 'pool_detail' pool.id %}" class="btn btn-primary">View Pool</a>
+                                    <div style="margin-top: 10px;">
+                                        <a href="{% url 'pool_detail' pool.id %}" style="display: block; text-align: center; background-color: #10B981; color: white; text-decoration: none; padding: 8px 0; border-radius: 4px; font-weight: 500;">View Pool</a>
                                     </div>
                                 </div>
                             </div>
+                        {% endfor %}
                         </div>
-                    {% endfor %}
-                </div>
+                    </div>
+                    </div>
             {% else %}
-                <div class="alert alert-info">
-                    <p>You are not currently participating in any pools.</p>
-                    <p>Please contact the administrator to join a pool.</p>
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="pool-card">
+                            <p>You are not currently participating in any pools.</p>
+                            <p>Please contact the administrator to join a pool.</p>
+                        </div>
+                    </div>
                 </div>
+                {% endif %}
+            {% else %}
+                <h2 class="section-title">NFL Survivor Pool 2025</h2>
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="pool-card">
+                    <p class="lead">
+                        Welcome to the Last Man Standing NFL Survivor Pool for the 2025 season!
+                    </p>
+                    <p>
+                        In a survivor pool, each participant picks one NFL team each week. If your team wins, you survive to the next week.
+                        If your team loses, you're eliminated. The catch? You can only use each team once during the season!
+                    </p>
+                    <p>
+                        <a class="btn btn-primary btn-lg" href="{% url 'register' %}" role="button">Sign Up Now</a>
+                        <a class="btn btn-outline-light btn-lg" href="{% url 'login' %}" role="button">Login</a>
+                    </p>
+                        </div> <!-- Close pool-card -->
+                    </div> <!-- Close col -->
+                </div> <!-- Close row -->
             {% endif %}
-        {% else %}
-            <div class="jumbotron">
-                <h2>NFL Survivor Pool 2025</h2>
-                <p class="lead">
-                    Welcome to the Last Man Standing NFL Survivor Pool for the 2025 season!
-                </p>
-                <p>
-                    In a survivor pool, each participant picks one NFL team each week. If your team wins, you survive to the next week.
-                    If your team loses, you're eliminated. The catch? You can only use each team once during the season!
-                </p>
-                <p>
-                    <a class="btn btn-primary btn-lg" href="{% url 'register' %}" role="button">Sign Up Now</a>
-                    <a class="btn btn-outline-secondary btn-lg" href="{% url 'login' %}" role="button">Login</a>
-                </p>
-            </div>
-        {% endif %}
-    </div>
-</div>
+        </div> <!-- Close col-md-12 -->
+    </div> <!-- Close row -->
+</div> <!-- Close home-container -->
 {% endblock %}

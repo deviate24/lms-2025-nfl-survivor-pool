@@ -1,6 +1,51 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Login - LMS 2025{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-image: url('{% static "images/footballfield.png" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        min-height: 100vh;
+    }
+    
+    .card {
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        margin-top: 80px;
+    }
+    
+    .card-header {
+        background-color: #1e3a8a;
+        color: white;
+        border-bottom: none;
+    }
+    
+    .form-control {
+        background-color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .btn-primary {
+        background-color: #10B981;
+        border-color: #10B981;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0ea271;
+        border-color: #0ea271;
+    }
+    
+    a {
+        color: #10B981;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="row">

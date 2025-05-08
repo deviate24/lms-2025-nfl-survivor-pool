@@ -14,6 +14,12 @@
     <!-- NFL Team Colors -->
     <!-- NFL Team Colors - Standard CSS that works in all browsers -->
     <style>
+        /* Prevent horizontal scrolling */
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
         /* Base styling for team badges */
         .team-badge, .colorized-team {
             display: inline-block;
@@ -345,6 +351,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
+            <div style="width: 5%;" class="invisible"></div>
             <a class="navbar-brand" href="{% url 'home' %}">LMS 2025</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -394,7 +401,7 @@
     </nav>
     
     <!-- Main Content -->
-    <div class="container main-content py-4">
+    <div class="main-content py-4">
         <!-- Messages -->
         {% if messages %}
             {% for message in messages %}
@@ -409,12 +416,7 @@
         {% block content %}{% endblock %}
     </div>
     
-    <!-- Footer -->
-    <footer class="text-center">
-        <div class="container">
-            <p class="mb-0">&copy; 2025 LMS NFL Survivor Pool</p>
-        </div>
-    </footer>
+    <!-- Footer removed -->
     
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
