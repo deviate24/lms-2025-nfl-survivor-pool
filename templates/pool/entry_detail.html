@@ -139,7 +139,7 @@
                             <div class="d-flex flex-wrap">
                                 {% for team in available_teams %}
                                     <div class="me-2 mb-2">
-                                        <span class="badge bg-secondary p-2">{{ team.city }} {{ team.name }}</span>
+                                        <span class="badge team-badge team-{{ team.abbreviation }} p-2">{{ team.city }} {{ team.name }}</span>
                                     </div>
                                 {% endfor %}
                             </div>

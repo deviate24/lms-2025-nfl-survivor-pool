@@ -5,21 +5,20 @@
 {% block head_extra %}
 <style>
     /* Available Teams Section Styling */
-    .team-badge {
-        font-size: 0.8rem;
-        min-width: 75px;
-        text-align: center;
-        cursor: default;
-        transition: all 0.2s ease;
+    .available-teams-grid .team-badge {
+        width: auto;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        color: white;
+        text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.7);
+        transition: all 0.2s ease-in-out;
     }
     
-    .team-badge:hover {
-        transform: scale(1.05);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-    
-    .available-teams-grid .badge.bg-secondary {
-        background-color: #6c757d !important;
+    /* Hover effect for team badges */
+    .available-teams-grid .team-badge:hover {
+        transform: scale(1.1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
     
     /* Add a subtle divider between conferences on mobile */
@@ -28,6 +27,43 @@
             margin-bottom: 1.5rem;
         }
     }
+    
+    /* Team-specific colors - directly added to the template */
+    /* AFC Teams */
+    .team-BAL { background-color: #241773 !important; } /* Ravens */
+    .team-BUF { background-color: #00338D !important; } /* Bills */
+    .team-CIN { background-color: #FB4F14 !important; color: black !important; } /* Bengals */
+    .team-CLE { background-color: #FF3C00 !important; } /* Browns */
+    .team-DEN { background-color: #FB4F14 !important; } /* Broncos */
+    .team-HOU { background-color: #03202F !important; } /* Texans */
+    .team-IND { background-color: #002C5F !important; } /* Colts */
+    .team-JAX { background-color: #006778 !important; } /* Jaguars */
+    .team-KC { background-color: #E31837 !important; } /* Chiefs */
+    .team-LV { background-color: #000000 !important; } /* Raiders */
+    .team-LAC { background-color: #0080C6 !important; } /* Chargers */
+    .team-MIA { background-color: #008E97 !important; } /* Dolphins */
+    .team-NE { background-color: #002244 !important; } /* Patriots */
+    .team-NYJ { background-color: #125740 !important; } /* Jets */
+    .team-PIT { background-color: #FFB612 !important; color: black !important; } /* Steelers */
+    .team-TEN { background-color: #0C2340 !important; } /* Titans */
+    
+    /* NFC Teams */
+    .team-ARI { background-color: #97233F !important; } /* Cardinals */
+    .team-ATL { background-color: #A71930 !important; } /* Falcons */
+    .team-CAR { background-color: #0085CA !important; } /* Panthers */
+    .team-CHI { background-color: #0B162A !important; } /* Bears */
+    .team-DAL { background-color: #002244 !important; } /* Cowboys */
+    .team-DET { background-color: #0076B6 !important; } /* Lions */
+    .team-GB { background-color: #203731 !important; } /* Packers */
+    .team-LAR { background-color: #003594 !important; } /* Rams */
+    .team-MIN { background-color: #4F2683 !important; } /* Vikings */
+    .team-NO { background-color: #D3BC8D !important; color: black !important; } /* Saints */
+    .team-NYG { background-color: #0B2265 !important; } /* Giants */
+    .team-PHI { background-color: #004C54 !important; } /* Eagles */
+    .team-SF { background-color: #AA0000 !important; } /* 49ers */
+    .team-SEA { background-color: #002244 !important; } /* Seahawks */
+    .team-TB { background-color: #D50A0A !important; } /* Buccaneers */
+    .team-WAS { background-color: #773141 !important; } /* Commanders */
 </style>
 {% endblock %}
 
@@ -73,7 +109,7 @@
                                     <div class="d-flex flex-wrap gap-1 mb-3">
                                         {% for team in available_team_ids %}
                                             {% if team.conference == 'AFC' %}
-                                                <span class="badge bg-secondary p-2 mb-1 team-badge" 
+                                                <span class="badge p-2 mb-1 team-badge team-{{ team.abbreviation }}" 
                                                       title="{{ team.city }} {{ team.name }}">
                                                     {{ team.abbreviation }}
                                                 </span>
@@ -87,7 +123,7 @@
                                     <div class="d-flex flex-wrap gap-1 mb-3">
                                         {% for team in available_team_ids %}
                                             {% if team.conference == 'NFC' %}
-                                                <span class="badge bg-secondary p-2 mb-1 team-badge"
+                                                <span class="badge p-2 mb-1 team-badge team-{{ team.abbreviation }}"
                                                       title="{{ team.city }} {{ team.name }}">
                                                     {{ team.abbreviation }}
                                                 </span>
@@ -104,7 +140,7 @@
                                     <div class="d-flex flex-wrap gap-1 mb-3">
                                         {% for team in available_team_ids %}
                                             {% if team.conference == 'AFC' %}
-                                                <span class="badge bg-secondary p-2 mb-1 team-badge" 
+                                                <span class="badge p-2 mb-1 team-badge team-{{ team.abbreviation }}" 
                                                       title="{{ team.city }} {{ team.name }}">
                                                     {{ team.abbreviation }}
                                                 </span>
@@ -118,7 +154,7 @@
                                     <div class="d-flex flex-wrap gap-1 mb-3">
                                         {% for team in available_team_ids %}
                                             {% if team.conference == 'NFC' %}
-                                                <span class="badge bg-secondary p-2 mb-1 team-badge"
+                                                <span class="badge p-2 mb-1 team-badge team-{{ team.abbreviation }}"
                                                       title="{{ team.city }} {{ team.name }}">
                                                     {{ team.abbreviation }}
                                                 </span>

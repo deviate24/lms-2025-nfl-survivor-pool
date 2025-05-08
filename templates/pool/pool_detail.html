@@ -56,7 +56,7 @@
                                                 <div class="d-flex flex-wrap mt-1">
                                                     {% for pick in entry_data.picks %}
                                                         <div class="me-3 mb-1">
-                                                            <span class="badge {% if pick.result == 'win' %}bg-success{% elif pick.result == 'loss' %}bg-danger{% elif pick.result == 'tie' %}bg-warning{% else %}bg-secondary{% endif %} p-2">
+                                                            <span class="badge {% if pick.result == 'win' %}bg-success{% elif pick.result == 'loss' %}bg-danger{% elif pick.result == 'tie' %}bg-warning{% else %}team-badge team-{{ pick.team.abbreviation }}{% endif %} p-2">
                                                                 {{ pick.team.city }} {{ pick.team.name }}
                                                                 {% if pick.result != 'pending' %}
                                                                     ({{ pick.get_result_display }})

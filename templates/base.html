@@ -11,6 +11,55 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- NFL Team Colors -->
+    <!-- NFL Team Colors - Standard CSS that works in all browsers -->
+    <style>
+        /* Base styling for team badges */
+        .team-badge, .colorized-team {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            font-weight: 500;
+            color: white;
+            text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Individual team colors */
+        .team-ARI, .colorized-team-ARI { background-color: #97233F !important; }
+        .team-ATL, .colorized-team-ATL { background-color: #A71930 !important; }
+        .team-BAL, .colorized-team-BAL { background-color: #241773 !important; }
+        .team-BUF, .colorized-team-BUF { background-color: #00338D !important; }
+        .team-CAR, .colorized-team-CAR { background-color: #0085CA !important; }
+        .team-CHI, .colorized-team-CHI { background-color: #0B162A !important; }
+        .team-CIN, .colorized-team-CIN { background-color: #FB4F14 !important; color: black !important; }
+        .team-CLE, .colorized-team-CLE { background-color: #FF3C00 !important; }
+        .team-DAL, .colorized-team-DAL { background-color: #002244 !important; }
+        .team-DEN, .colorized-team-DEN { background-color: #FB4F14 !important; }
+        .team-DET, .colorized-team-DET { background-color: #0076B6 !important; }
+        .team-GB, .colorized-team-GB { background-color: #203731 !important; }
+        .team-HOU, .colorized-team-HOU { background-color: #03202F !important; }
+        .team-IND, .colorized-team-IND { background-color: #002C5F !important; }
+        .team-JAX, .colorized-team-JAX { background-color: #006778 !important; }
+        .team-KC, .colorized-team-KC { background-color: #E31837 !important; }
+        .team-LV, .colorized-team-LV { background-color: #000000 !important; }
+        .team-LAC, .colorized-team-LAC { background-color: #0080C6 !important; }
+        .team-LAR, .colorized-team-LAR { background-color: #003594 !important; }
+        .team-MIA, .colorized-team-MIA { background-color: #008E97 !important; }
+        .team-MIN, .colorized-team-MIN { background-color: #4F2683 !important; }
+        .team-NE, .colorized-team-NE { background-color: #002244 !important; }
+        .team-NO, .colorized-team-NO { background-color: #D3BC8D !important; color: black !important; }
+        .team-NYG, .colorized-team-NYG { background-color: #0B2265 !important; }
+        .team-NYJ, .colorized-team-NYJ { background-color: #125740 !important; }
+        .team-PHI, .colorized-team-PHI { background-color: #004C54 !important; }
+        .team-PIT, .colorized-team-PIT { background-color: #FFB612 !important; color: black !important; }
+        .team-SF, .colorized-team-SF { background-color: #AA0000 !important; }
+        .team-SEA, .colorized-team-SEA { background-color: #002244 !important; }
+        .team-TB, .colorized-team-TB { background-color: #D50A0A !important; }
+        .team-TEN, .colorized-team-TEN { background-color: #0C2340 !important; }
+        .team-WAS, .colorized-team-WAS { background-color: #773141 !important; }
+    </style>
+    
     <!-- Custom styles -->
     <style>
         :root {
@@ -205,6 +254,92 @@
     </style>
     
     {% block extra_css %}{% endblock %}
+    <!-- JavaScript to colorize team abbreviations across the entire application -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Team colors mapping
+            const teamColors = {
+                'ARI': '#97233F', 'ATL': '#A71930', 'BAL': '#241773', 'BUF': '#00338D',
+                'CAR': '#0085CA', 'CHI': '#0B162A', 'CIN': '#FB4F14', 'CLE': '#FF3C00',
+                'DAL': '#002244', 'DEN': '#FB4F14', 'DET': '#0076B6', 'GB': '#203731',
+                'HOU': '#03202F', 'IND': '#002C5F', 'JAX': '#006778', 'KC': '#E31837',
+                'LV': '#000000', 'LAC': '#0080C6', 'LAR': '#003594', 'MIA': '#008E97',
+                'MIN': '#4F2683', 'NE': '#002244', 'NO': '#D3BC8D', 'NYG': '#0B2265',
+                'NYJ': '#125740', 'PHI': '#004C54', 'PIT': '#FFB612', 'SF': '#AA0000',
+                'SEA': '#002244', 'TB': '#D50A0A', 'TEN': '#0C2340', 'WAS': '#773141'
+            };
+
+            // Team text colors (dark background = white text, light background = black text)
+            const blackTextTeams = ['CIN', 'NO', 'PIT'];
+            
+            // Function to apply team colors to an element
+            function applyTeamColor(element, teamCode) {
+                if (teamColors[teamCode]) {
+                    element.style.backgroundColor = teamColors[teamCode];
+                    element.style.color = blackTextTeams.includes(teamCode) ? 'black' : 'white';
+                    element.style.textShadow = '0px 0px 2px rgba(0, 0, 0, 0.7)';
+                    element.style.padding = '4px 8px';
+                    element.style.margin = '2px';
+                    element.style.borderRadius = '4px';
+                    element.style.fontWeight = '500';
+                    element.style.display = 'inline-block';
+                }
+            }
+
+            // 1. Target the exact layout in the first screenshot (make_pick.html)
+            document.querySelectorAll('.available-teams-grid span').forEach(span => {
+                const text = span.textContent.trim();
+                applyTeamColor(span, text);
+            });
+
+            // 2. Target AFC and NFC sections specifically
+            const afcSection = document.querySelector('.afc') || document.querySelector('#AFC');
+            const nfcSection = document.querySelector('.nfc') || document.querySelector('#NFC');
+            
+            if (afcSection) {
+                afcSection.querySelectorAll('span').forEach(span => {
+                    const text = span.textContent.trim();
+                    applyTeamColor(span, text);
+                });
+            }
+            
+            if (nfcSection) {
+                nfcSection.querySelectorAll('span').forEach(span => {
+                    const text = span.textContent.trim();
+                    applyTeamColor(span, text);
+                });
+            }
+
+            // 3. Universal approach for any three-letter team abbreviation in specific contexts
+            const nflTeamRegex = /^(ARI|ATL|BAL|BUF|CAR|CHI|CIN|CLE|DAL|DEN|DET|GB|HOU|IND|JAX|KC|LV|LAC|LAR|MIA|MIN|NE|NO|NYG|NYJ|PHI|PIT|SF|SEA|TB|TEN|WAS)$/;
+            
+            // Find all span elements that just contain NFL team abbreviations
+            document.querySelectorAll('span').forEach(span => {
+                if (span.childElementCount === 0) { // Only target spans with no children
+                    const text = span.textContent.trim();
+                    if (nflTeamRegex.test(text)) {
+                        applyTeamColor(span, text);
+                    }
+                }
+            });
+
+            // 4. Apply to specific layouts seen in screenshots
+            document.querySelectorAll('.badge').forEach(badge => {
+                const text = badge.textContent.trim();
+                if (nflTeamRegex.test(text)) {
+                    applyTeamColor(badge, text);
+                }
+            });
+
+            // 5. Specifically target the layout in screenshot 1
+            document.querySelectorAll('div > span:not([class])').forEach(span => {
+                const text = span.textContent.trim();
+                if (nflTeamRegex.test(text)) {
+                    applyTeamColor(span, text);
+                }
+            });
+        });
+    </script>
 </head>
 <body>
     <!-- Navigation -->
