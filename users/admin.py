@@ -43,6 +43,8 @@ class LogEntryAdmin(admin.ModelAdmin):
     list_filter = ['user', 'content_type']
     search_fields = ['object_repr', 'change_message']
     list_display = ['action_time', 'user', 'content_type', 'action_flag_display', 'object_link', 'change_message']
+    list_per_page = 50  # Show 50 logs per page by default
+    list_max_show_all = 500  # Allow showing up to 500 logs on one page
     readonly_fields = [
         'action_time', 'user', 'content_type', 'object_id', 'object_repr', 
         'action_flag', 'change_message', 'object_link'
