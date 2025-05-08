@@ -6,20 +6,19 @@
 <div class="row">
     <div class="col-md-10 offset-md-1">
         <div class="card">
-            <div class="card-header">
-                <h2 class="card-title mb-0">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title mb-0 fs-4">
+                    Quick Pick for Week {{ week.number }}
                     {% if is_double_pick %}
-                        Quick Pick for Week {{ week.number }} (Double-Pick Week)
-                    {% else %}
-                        Quick Pick for Week {{ week.number }}
+                        <span class="badge bg-warning text-dark ms-2">Double-Pick Week</span>
                     {% endif %}
                 </h2>
             </div>
             <div class="card-body">
-                <div class="alert alert-info">
-                    <p><strong>Deadline:</strong> {{ week.deadline|date:"l, F j, Y, g:i A T" }}</p>
+                <div class="alert alert-info mb-3">
+                    <p class="mb-1"><strong>Deadline:</strong> {{ week.deadline|date:"l, F j, Y, g:i A T" }}</p>
                     {% if is_double_pick %}
-                        <p><strong>Double-Pick Week:</strong> You must select two teams for each entry this week. At least one must win for the entry to survive.</p>
+                        <p class="mb-0"><strong>Double-Pick Week:</strong> You must select two teams for each entry this week. At least one must win for the entry to survive.</p>
                     {% endif %}
                 </div>
                 
@@ -34,64 +33,30 @@
                         </div>
                     {% endif %}
                     
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Entry</th>
-                                    {% if is_double_pick %}
-                                        <th>Pick 1</th>
-                                        <th>Pick 2</th>
-                                    {% else %}
-                                        <th>Pick</th>
-                                    {% endif %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for entry in entries %}
-                                    <tr>
-                                        <td>{{ entry.entry_name }}</td>
-                                        {% if is_double_pick %}
-                                            <td>
-                                                {{ form.field_from_name|default_if_none:form.entry_entry.id_team1 }}
-                                                {% if form.entry_entry.id_team1.errors %}
-                                                    <div class="text-danger">
-                                                        {% for error in form.entry_entry.id_team1.errors %}
-                                                            {{ error }}
-                                                        {% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {{ form.field_from_name|default_if_none:form.entry_entry.id_team2 }}
-                                                {% if form.entry_entry.id_team2.errors %}
-                                                    <div class="text-danger">
-                                                        {% for error in form.entry_entry.id_team2.errors %}
-                                                            {{ error }}
-                                                        {% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </td>
-                                        {% else %}
-                                            <td>
-                                                {{ form.field_from_name|default_if_none:form.entry_entry.id_team }}
-                                                {% if form.entry_entry.id_team.errors %}
-                                                    <div class="text-danger">
-                                                        {% for error in form.entry_entry.id_team.errors %}
-                                                            {{ error }}
-                                                        {% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </td>
-                                        {% endif %}
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                    <!-- Simple form rendering with clear labels and large touch targets -->
+                    {% for field in form %}
+                        <div class="card mb-3">
+                            <div class="card-header bg-dark text-white py-2">
+                                <h5 class="card-title mb-0">{{ field.label }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <select name="{{ field.html_name }}" id="{{ field.auto_id }}" class="form-select form-select-lg">
+                                    <option value="">--- Select Team ---</option>
+                                    {% for choice in field.field.choices %}
+                                        <option value="{{ choice.0 }}" {% if field.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if field.errors %}
+                                    <div class="text-danger mt-2">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
                     
-                    <div class="d-grid gap-2 mt-3">
-                        <button type="submit" class="btn btn-primary">Submit All Picks</button>
+                    <div class="d-grid gap-2 mt-4 mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">Submit All Picks</button>
                         <a href="{% url 'pool_detail' pool.id %}" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
@@ -99,4 +64,25 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Apply enhanced mobile styles on smaller screens
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.innerWidth < 768) {
+            // Make form elements more touch-friendly
+            const selects = document.querySelectorAll('.form-select');
+            selects.forEach(select => {
+                select.style.fontSize = '16px';
+                select.style.height = '48px';
+                select.style.padding = '10px';
+            });
+            
+            const buttons = document.querySelectorAll('.btn-lg');
+            buttons.forEach(button => {
+                button.style.padding = '12px';
+                button.style.fontSize = '18px';
+            });
+        }
+    });
+</script>
 {% endblock %}

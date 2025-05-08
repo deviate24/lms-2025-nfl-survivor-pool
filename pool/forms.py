@@ -191,6 +191,7 @@ class QuickPickForm(forms.Form):
         self.user = kwargs.pop('user', None)
         self.week = kwargs.pop('week', None)
         self.entries = kwargs.pop('entries', None)
+        self.is_double_pick = kwargs.pop('is_double_pick', False)
         
         super().__init__(*args, **kwargs)
         
@@ -199,19 +200,29 @@ class QuickPickForm(forms.Form):
             for entry in self.entries:
                 available_teams = entry.get_available_teams(self.week)
                 
-                if self.week.is_double:
+                # Get existing picks for this entry to ensure they're included in the dropdown
+                existing_picks = Pick.objects.filter(entry=entry, week=self.week)
+                existing_teams = None
+                if existing_picks.exists():
+                    existing_teams = Team.objects.filter(id__in=existing_picks.values_list('team_id', flat=True))
+                    # Add existing teams to available teams
+                    if existing_teams:
+                        # Create union of available teams and existing teams
+                        available_teams = available_teams | existing_teams
+                
+                if self.is_double_pick:
                     # For double-pick weeks, create two fields per entry
                     self.fields[f'entry_{entry.id}_team1'] = forms.ModelChoiceField(
                         queryset=available_teams,
                         label=f"{entry.entry_name} - Pick 1",
                         required=True,
-                        widget=forms.Select(attrs={'class': 'form-select'})
+                        widget=forms.Select(attrs={'class': 'form-select mb-2'})
                     )
                     self.fields[f'entry_{entry.id}_team2'] = forms.ModelChoiceField(
                         queryset=available_teams,
                         label=f"{entry.entry_name} - Pick 2",
                         required=True,
-                        widget=forms.Select(attrs={'class': 'form-select'})
+                        widget=forms.Select(attrs={'class': 'form-select mb-3'})
                     )
                 else:
                     # For regular weeks, create one field per entry
@@ -219,7 +230,7 @@ class QuickPickForm(forms.Form):
                         queryset=available_teams,
                         label=f"{entry.entry_name}",
                         required=True,
-                        widget=forms.Select(attrs={'class': 'form-select'})
+                        widget=forms.Select(attrs={'class': 'form-select mb-3'})
                     )
     
     def clean(self):
@@ -229,7 +240,7 @@ class QuickPickForm(forms.Form):
             raise ValidationError("The deadline for this week has passed.")
         
         # For double-pick weeks, ensure picks are different for each entry
-        if self.week and self.week.is_double:
+        if self.week and self.is_double_pick:
             for entry in self.entries:
                 team1_key = f'entry_{entry.id}_team1'
                 team2_key = f'entry_{entry.id}_team2'
@@ -252,7 +263,7 @@ class QuickPickForm(forms.Form):
         picks = []
         
         for entry in self.entries:
-            if self.week.is_double:
+            if self.is_double_pick:
                 # Handle double-pick week
                 team1 = self.cleaned_data[f'entry_{entry.id}_team1']
                 team2 = self.cleaned_data[f'entry_{entry.id}_team2']

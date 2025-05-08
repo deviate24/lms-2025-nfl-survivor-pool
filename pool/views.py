@@ -360,15 +360,26 @@ def quick_pick(request, pool_id):
         messages.error(request, f"The deadline for Week {current_week.number} has passed.")
         return redirect('pool_detail', pool_id=pool.id)
     
+    # Get week settings to check if this is a double-pick week
+    week_settings = PoolWeekSettings.objects.filter(pool=pool, week=current_week).first()
+    is_double_pick = week_settings.is_double if week_settings else False
+    
     if request.method == 'POST':
         form = QuickPickForm(
             request.POST,
             user=request.user,
             week=current_week,
-            entries=user_entries
+            entries=user_entries,
+            is_double_pick=is_double_pick
         )
         
         if form.is_valid():
+            # Store existing picks for audit logging
+            existing_picks_map = {}
+            for entry in user_entries:
+                entry_picks = list(Pick.objects.filter(entry=entry, week=current_week))
+                existing_picks_map[entry.id] = entry_picks
+            
             # Delete existing picks for this week
             for entry in user_entries:
                 Pick.objects.filter(entry=entry, week=current_week).delete()
@@ -376,15 +387,59 @@ def quick_pick(request, pool_id):
             # Save new picks
             picks = form.save()
             
+            # Create audit log entries for each entry
+            for entry in user_entries:
+                if is_double_pick:
+                    team1_field = f'entry_{entry.id}_team1'
+                    team2_field = f'entry_{entry.id}_team2'
+                    
+                    if team1_field in form.cleaned_data and team2_field in form.cleaned_data:
+                        team1 = form.cleaned_data[team1_field]
+                        team2 = form.cleaned_data[team2_field]
+                        
+                        # Get old teams for comparison
+                        old_teams = [p.team for p in existing_picks_map.get(entry.id, [])]
+                        old_teams_str = ", ".join([t.name for t in old_teams]) if old_teams else "None"
+                        
+                        # Create audit entry
+                        if old_teams:
+                            action = "Changed Pick"
+                            details = f"Changed from {old_teams_str} to {team1.name}, {team2.name} via Quick Pick"
+                        else:
+                            action = "Made Pick"
+                            details = f"Selected {team1.name}, {team2.name} via Quick Pick"
+                        
+                        AuditLog.create(request.user, action, entry, current_week, details)
+                else:
+                    team_field = f'entry_{entry.id}_team'
+                    
+                    if team_field in form.cleaned_data:
+                        team = form.cleaned_data[team_field]
+                        
+                        # Get old team for comparison
+                        old_teams = [p.team for p in existing_picks_map.get(entry.id, [])]
+                        old_team_str = old_teams[0].name if old_teams else "None"
+                        
+                        # Create audit entry
+                        if old_teams:
+                            action = "Changed Pick"
+                            details = f"Changed from {old_team_str} to {team.name} via Quick Pick"
+                        else:
+                            action = "Made Pick"
+                            details = f"Selected {team.name} via Quick Pick"
+                        
+                        AuditLog.create(request.user, action, entry, current_week, details)
+            
             messages.success(request, f"Your picks for Week {current_week.number} have been saved.")
             return redirect('pool_detail', pool_id=pool.id)
     else:
         # Pre-populate form with existing picks
         initial_data = {}
+        
         for entry in user_entries:
             existing_picks = Pick.objects.filter(entry=entry, week=current_week)
             
-            if current_week.is_double:
+            if is_double_pick:
                 if existing_picks.count() >= 2:
                     initial_data[f'entry_{entry.id}_team1'] = existing_picks[0].team
                     initial_data[f'entry_{entry.id}_team2'] = existing_picks[1].team
@@ -396,6 +451,7 @@ def quick_pick(request, pool_id):
             user=request.user,
             week=current_week,
             entries=user_entries,
+            is_double_pick=is_double_pick,
             initial=initial_data
         )
     
@@ -404,7 +460,7 @@ def quick_pick(request, pool_id):
         'pool': pool,
         'week': current_week,
         'entries': user_entries,
-        'is_double_pick': current_week.is_double,
+        'is_double_pick': is_double_pick,
     }
     
     return render(request, 'pool/quick_pick.html', context)
