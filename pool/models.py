@@ -36,8 +36,8 @@ class Week(models.Model):
     """
     number = models.PositiveIntegerField()  # Week number (1-18 for regular season)
     description = models.CharField(max_length=100, blank=True)  # Optional description
-    start_date = models.DateField()  # First day of the week
-    end_date = models.DateField()  # Last day of the week
+    start_date = models.DateTimeField()  # First day of the week with time
+    end_date = models.DateTimeField()  # Last day of the week with time
     deadline = models.DateTimeField()  # Deadline for picks (Thursday 4PM PT)
     is_regular_season = models.BooleanField(default=True)  # Regular season or playoffs
     # is_double moved to PoolWeekSettings
@@ -52,9 +52,9 @@ class Week(models.Model):
         return f"Week {self.number}" + (f" ({self.description})" if self.description else "")
     
     def is_current(self):
-        """Check if this is the current week based on today's date"""
-        today = timezone.now().date()
-        return self.start_date <= today <= self.end_date
+        """Check if this is the current week based on current date and time"""
+        now = timezone.now()
+        return self.start_date <= now <= self.end_date
     
     def is_past_deadline(self, for_admin=False):
         """Check if the pick deadline has passed"""
@@ -67,7 +67,7 @@ class Week(models.Model):
     
     def is_future(self):
         """Check if this week is in the future"""
-        return self.start_date > timezone.now().date()
+        return self.start_date > timezone.now()
 
 
 class PoolWeekSettings(models.Model):
@@ -108,8 +108,8 @@ class Pool(models.Model):
     
     def get_current_week(self):
         """Get the current week for this pool"""
-        today = timezone.now().date()
-        return Week.objects.filter(start_date__lte=today, end_date__gte=today).first()
+        now = timezone.now()
+        return Week.objects.filter(start_date__lte=now, end_date__gte=now).first()
     
     def get_alive_entries_count(self):
         """Get the count of entries still alive in this pool"""

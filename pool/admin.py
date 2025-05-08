@@ -16,11 +16,27 @@ class TeamAdmin(admin.ModelAdmin):
     search_fields = ('name', 'city', 'abbreviation')
 
 
+class WeekAdminForm(forms.ModelForm):
+    class Meta:
+        model = Week
+        fields = '__all__'
+        widgets = {
+            # Use date and time inputs with specific formats
+            'start_date': admin.widgets.AdminSplitDateTime(),
+            'end_date': admin.widgets.AdminSplitDateTime(),
+            'deadline': admin.widgets.AdminSplitDateTime(),
+            'reminder_time': admin.widgets.AdminSplitDateTime()
+        }
+
 @admin.register(Week)
 class WeekAdmin(admin.ModelAdmin):
+    form = WeekAdminForm
     list_display = ('number', 'description', 'start_date', 'end_date', 'deadline', 'reset_pool', 'process_results_link')
     list_filter = ('is_regular_season', 'reset_pool')
     search_fields = ('number', 'description')
+    
+    # Ensure date fields show with time components
+    fields = ('number', 'description', 'start_date', 'end_date', 'deadline', 'is_regular_season', 'reset_pool', 'reminder_time', 'email_sent')
     
     def process_results_link(self, obj):
         return format_html(
