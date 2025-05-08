@@ -1,0 +1,31 @@
+NFL Survivor Pool - Week {{ week.number }} Report
+=========================================
+
+Hello {{ user.get_full_name|default:user.username }},
+
+The deadline for Week {{ week.number }} picks in the {{ pool.name }} pool has passed. Here's a summary of all picks for this week:
+
+{% if user_picks %}
+YOUR PICKS
+---------
+{% for pick in user_picks %}
+* {{ pick.entry.entry_name }}: {{ pick.team.city }} {{ pick.team.name }}
+{% endfor %}
+{% else %}
+You didn't make any picks for Week {{ week.number }}.
+{% endif %}
+
+TEAM DISTRIBUTION
+---------------
+{% for item in team_distribution %}
+* {{ item.team.city }} {{ item.team.name }}: {{ item.count }} entries
+{% endfor %}
+
+Good luck this week!
+
+You can view the full standings and pick distribution on the standings page at:
+{{ site_url }}{% url 'standings' pool.id %}
+
+---
+This is an automated email from the NFL Survivor Pool application. Please do not reply to this email.
+© {% now "Y" %} LMS 2025 NFL Survivor Pool

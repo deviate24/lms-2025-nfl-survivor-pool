@@ -1,10 +1,12 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Count, Q
-from .models import Pool, Entry, Team, Week, Pick, PoolWeekSettings, AuditLog
-from .forms import PickForm, DoublePickForm, QuickPickForm
+from django.http import HttpResponseForbidden
+
+from .models import Pool, Entry, Week, Pick, Team, AuditLog, PoolWeekSettings
+from .forms import PickForm, QuickPickForm, DoublePickForm
 
 
 @login_required
@@ -489,26 +491,38 @@ def standings(request, pool_id):
             start_date__gt=timezone.now().date()
         ).order_by('start_date').first()
     
-    # Get picks for the current week (only if deadline has passed)
+    # Get picks for the current week
     current_week_picks = None
-    if current_week and current_week.is_past_deadline():
-        current_week_picks = Pick.objects.filter(week=current_week, entry__pool=pool)
-        
-        # Count how many entries picked each team
-        team_counts = current_week_picks.values('team').annotate(
-            count=Count('entry', distinct=True)
-        ).order_by('-count')
-        
-        # Get team objects for the counts
-        teams_with_counts = []
-        for item in team_counts:
-            team = Team.objects.get(id=item['team'])
-            teams_with_counts.append({
-                'team': team,
-                'count': item['count']
-            })
-    else:
-        teams_with_counts = None
+    teams_with_counts = None
+    user_entries_ids = []
+    
+    # Get the user's entries IDs for this pool
+    if request.user.is_authenticated:
+        user_entries_ids = Entry.objects.filter(pool=pool, user=request.user).values_list('id', flat=True)
+    
+    if current_week:
+        if current_week.is_past_deadline():
+            # If deadline has passed, show all picks
+            current_week_picks = Pick.objects.filter(week=current_week, entry__pool=pool)
+            
+            # Count how many entries picked each team
+            team_counts = current_week_picks.values('team').annotate(
+                count=Count('entry', distinct=True)
+            ).order_by('-count')
+            
+            # Get team objects for the counts
+            teams_with_counts = []
+            for item in team_counts:
+                team = Team.objects.get(id=item['team'])
+                teams_with_counts.append({
+                    'team': team,
+                    'count': item['count']
+                })
+        else:
+            # If deadline has not passed, only show user's picks
+            if user_entries_ids:
+                current_week_picks = Pick.objects.filter(week=current_week, entry__id__in=user_entries_ids)
+                # Don't show team distribution before deadline
     
     context = {
         'pool': pool,

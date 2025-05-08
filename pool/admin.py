@@ -114,10 +114,22 @@ class PoolWeekSettingsInline(admin.TabularInline):
 
 @admin.register(Pool)
 class PoolAdmin(admin.ModelAdmin):
-    list_display = ('name', 'year', 'created_by', 'created_at', 'is_active')
+    list_display = ('name', 'year', 'created_by', 'created_at', 'is_active', 'view_pool_links')
     list_filter = ('year', 'is_active')
     search_fields = ('name', 'description')
     inlines = [PoolWeekSettingsInline]
+    
+    def view_pool_links(self, obj):
+        """
+        Add links to view the pool detail and standings pages
+        """
+        return format_html(
+            '<a href="{}" class="button" target="_blank" style="margin-right: 5px;">View Pool</a>'
+            '<a href="{}" class="button" target="_blank">View Standings</a>',
+            f'/pool/pool/{obj.id}/',
+            f'/pool/pool/{obj.id}/standings/'
+        )
+    view_pool_links.short_description = 'View Pool'
     
     def save_model(self, request, obj, form, change):
         is_new = not obj.pk

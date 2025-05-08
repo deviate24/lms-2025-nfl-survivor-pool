@@ -17,13 +17,17 @@ class UserRegisterForm(UserCreationForm):
 
 class UserUpdateForm(forms.ModelForm):
     """
-    Form for updating user information.
+    Form for displaying user information (read-only).
+    User details are created by admins and cannot be changed by users.
     """
-    email = forms.EmailField()
+    username = forms.CharField(disabled=True)
+    email = forms.EmailField(disabled=True)
+    first_name = forms.CharField(disabled=True, required=False)
+    last_name = forms.CharField(disabled=True, required=False)
     
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'first_name', 'last_name']
 
 
 class ProfileUpdateForm(forms.ModelForm):

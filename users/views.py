@@ -27,13 +27,13 @@ def profile(request):
     User profile view for updating account information.
     """
     if request.method == 'POST':
-        u_form = UserUpdateForm(request.POST, instance=request.user)
+        u_form = UserUpdateForm(instance=request.user)  # Always read-only, not from POST
         p_form = ProfileUpdateForm(request.POST, instance=request.user.profile)
         
-        if u_form.is_valid() and p_form.is_valid():
-            u_form.save()
+        if p_form.is_valid():
+            # Only save profile preferences, username/email are read-only
             p_form.save()
-            messages.success(request, 'Your account has been updated!')
+            messages.success(request, 'Your preferences have been updated!')
             return redirect('profile')
     else:
         u_form = UserUpdateForm(instance=request.user)

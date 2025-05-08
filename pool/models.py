@@ -42,6 +42,7 @@ class Week(models.Model):
     # is_double moved to PoolWeekSettings
     reset_pool = models.BooleanField(default=False)  # Whether to reset used teams (for playoffs)
     reminder_time = models.DateTimeField(null=True, blank=True)  # When to send reminders
+    email_sent = models.BooleanField(default=False)  # Whether pick report emails have been sent
     
     class Meta:
         ordering = ['number']
