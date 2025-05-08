@@ -272,12 +272,14 @@ class PickAdmin(admin.ModelAdmin):
 
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'user', 'action', 'entry_link', 'pool_link', 'week', 'details')
+    list_display = ('timestamp', 'pool_link', 'user', 'entry_link', 'week', 'action', 'details')
     list_filter = ('action', 'timestamp', 'week', ('entry__pool', admin.RelatedOnlyFieldListFilter))
     search_fields = ('user__username', 'entry__entry_name', 'entry__pool__name', 'details', 'action')
     readonly_fields = ('timestamp', 'user', 'action', 'entry', 'week', 'details')
     date_hierarchy = 'timestamp'
     ordering = ('-timestamp',)
+    list_per_page = 50  # Show 50 logs per page by default
+    list_max_show_all = 500  # Allow showing up to 500 logs on one page
     
     def entry_link(self, obj):
         if obj.entry:
