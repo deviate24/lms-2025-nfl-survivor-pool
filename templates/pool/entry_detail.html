@@ -12,6 +12,13 @@
             </a>
         </div>
         
+        {% if not is_owner %}
+        <div class="alert alert-info mb-3">
+            <i class="bi bi-info-circle-fill me-1"></i>
+            You are viewing another player's entry. For fairness, current week picks are only visible after the deadline passes.
+        </div>
+        {% endif %}
+        
         <div class="alert {% if entry.is_alive %}alert-success{% else %}alert-danger{% endif %}">
             <h5>Status: {% if entry.is_alive %}Alive{% else %}Eliminated{% endif %}</h5>
             {% if not entry.is_alive %}
@@ -36,46 +43,73 @@
                 <div class="card h-100 shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Current Week Pick</h5>
-                        {% if has_current_pick %}
+                        {% if has_current_pick and is_owner %}
                             <span class="badge bg-success">Picked</span>
-                        {% else %}
+                        {% elif not has_current_pick and is_owner %}
                             <span class="badge bg-warning">Pending</span>
                         {% endif %}
                     </div>
                     <div class="card-body">
                         {% if entry.is_alive %}
-                            {% if has_current_pick %}
-                                <h6>Week {{ current_week.number }} Pick{% if is_double_pick %}s{% endif %}:</h6>
-                                <ul class="list-group mb-3">
-                                    {% for pick in current_week_picks %}
-                                        <li class="list-group-item">
-                                            {{ pick.team.city }} {{ pick.team.name }}
-                                            {% if pick.result == 'win' %}
-                                                <span class="badge bg-success float-end">Win</span>
-                                            {% elif pick.result == 'loss' %}
-                                                <span class="badge bg-danger float-end">Loss</span>
-                                            {% elif pick.result == 'tie' %}
-                                                <span class="badge bg-warning float-end">Tie</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary float-end">Pending</span>
-                                            {% endif %}
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                                
-                                {% if not current_week.is_past_deadline %}
-                                    <div class="d-grid">
-                                        <a href="{% url 'make_pick' entry.id %}" class="btn btn-primary">Change Pick</a>
-                                    </div>
+                            {% if is_owner %}
+                                <!-- Owner sees everything -->
+                                {% if has_current_pick %}
+                                    <h6>Week {{ current_week.number }} Pick{% if is_double_pick %}s{% endif %}:</h6>
+                                    <ul class="list-group mb-3">
+                                        {% for pick in current_week_picks %}
+                                            <li class="list-group-item">
+                                                {{ pick.team.city }} {{ pick.team.name }}
+                                                {% if pick.result != 'pending' %}
+                                                    <span class="badge {% if pick.result == 'win' %}bg-success{% elif pick.result == 'loss' %}bg-danger{% else %}bg-warning{% endif %} float-end">
+                                                        {{ pick.get_result_display }}
+                                                    </span>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                    
+                                    {% if not current_week.is_past_deadline %}
+                                        <div class="d-grid">
+                                            <a href="{% url 'make_pick' entry.id %}" class="btn btn-primary">Change Pick</a>
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    {% if not current_week.is_past_deadline %}
+                                        <p>You haven't made a pick for Week {{ current_week.number }} yet.</p>
+                                        <div class="d-grid">
+                                            <a href="{% url 'make_pick' entry.id %}" class="btn btn-primary">Make Pick</a>
+                                        </div>
+                                    {% else %}
+                                        <p class="text-danger">You missed the deadline for Week {{ current_week.number }}.</p>
+                                    {% endif %}
                                 {% endif %}
                             {% else %}
-                                {% if not current_week.is_past_deadline %}
-                                    <p>You haven't made a pick for Week {{ current_week.number }} yet.</p>
-                                    <div class="d-grid">
-                                        <a href="{% url 'make_pick' entry.id %}" class="btn btn-primary">Make Pick</a>
-                                    </div>
+                                <!-- Non-owner viewing - privacy controls -->
+                                {% if current_week.is_past_deadline %}
+                                    <!-- After deadline, show the picks -->
+                                    {% if has_current_pick %}
+                                        <h6>Week {{ current_week.number }} Pick{% if is_double_pick %}s{% endif %}:</h6>
+                                        <ul class="list-group mb-3">
+                                            {% for pick in current_week_picks %}
+                                                <li class="list-group-item">
+                                                    {{ pick.team.city }} {{ pick.team.name }}
+                                                    {% if pick.result != 'pending' %}
+                                                        <span class="badge {% if pick.result == 'win' %}bg-success{% elif pick.result == 'loss' %}bg-danger{% else %}bg-warning{% endif %} float-end">
+                                                            {{ pick.get_result_display }}
+                                                        </span>
+                                                    {% endif %}
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p>No pick was made for Week {{ current_week.number }}.</p>
+                                    {% endif %}
                                 {% else %}
-                                    <p class="text-danger">You missed the deadline for Week {{ current_week.number }}.</p>
+                                    <!-- Before deadline, hide picks -->
+                                    <div class="alert alert-secondary">
+                                        <i class="bi bi-shield-lock me-1"></i>
+                                        Current week picks are hidden until the deadline passes.
+                                    </div>
                                 {% endif %}
                             {% endif %}
                         {% else %}
@@ -91,12 +125,21 @@
                         <h5 class="card-title mb-0">Available Teams</h5>
                     </div>
                     <div class="card-body">
+                        {% if not is_owner %}
+                            <p>Teams still available for <strong>{{ entry.user.username }}'s</strong> entry:</p>
+                        {% endif %}
+                        
                         {% if available_teams %}
-                            <p>You have {{ available_teams.count }} teams available to pick:</p>
-                            <div class="row">
+                            {% if is_owner %}
+                                <p>You have {{ available_teams.count }} teams available to pick:</p>
+                            {% else %}
+                                <p>{{ available_teams.count }} teams remaining:</p>
+                            {% endif %}
+                            
+                            <div class="d-flex flex-wrap">
                                 {% for team in available_teams %}
-                                    <div class="col-md-6 mb-1">
-                                        <small>{{ team.city }} {{ team.name }}</small>
+                                    <div class="me-2 mb-2">
+                                        <span class="badge bg-secondary p-2">{{ team.city }} {{ team.name }}</span>
                                     </div>
                                 {% endfor %}
                             </div>

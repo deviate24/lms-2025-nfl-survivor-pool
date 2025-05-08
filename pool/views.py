@@ -65,8 +65,16 @@ def pool_detail(request, pool_id):
     eliminated_entries = all_entries.filter(is_alive=False)
     
     # Get the current picks for each of the user's entries
+    # Sort entries so alive entries appear first, then eliminated entries
+    alive_user_entries = user_entries.filter(is_alive=True)
+    eliminated_user_entries = user_entries.filter(is_alive=False)
+    
+    # Combine the lists with alive entries first
+    sorted_user_entries = list(alive_user_entries) + list(eliminated_user_entries)
+    
+    # Get picks for each entry in the sorted order
     entries_with_picks = []
-    for entry in user_entries:
+    for entry in sorted_user_entries:
         # Get the current week's pick(s) for this entry
         picks = Pick.objects.filter(entry=entry, week=current_week).select_related('team')
         entry_data = {
@@ -97,13 +105,15 @@ def pool_detail(request, pool_id):
 def entry_detail(request, entry_id):
     """
     View showing details of a specific entry.
+    Privacy controls applied for non-owners:
+    - Only past week picks are visible to non-owners
+    - Current week picks are hidden until deadline passes
+    - Available teams are visible to anyone
     """
     entry = get_object_or_404(Entry, id=entry_id)
     
-    # Check if user owns this entry
-    if entry.user != request.user:
-        messages.error(request, "You do not have permission to view this entry.")
-        return redirect('home')
+    # Determine if the user is the owner of this entry
+    is_owner = (entry.user == request.user)
     
     # Get all picks for this entry
     picks = Pick.objects.filter(entry=entry).order_by('week__number')
@@ -137,6 +147,17 @@ def entry_detail(request, entry_id):
         if week_settings:
             is_double_pick = week_settings.is_double
     
+    # Apply privacy controls for non-owners
+    if not is_owner:
+        # For current week's picks, only show if past deadline
+        if current_week and not current_week.is_past_deadline:
+            current_week_picks = None
+            has_current_pick = False  # Hide this information
+        
+        # Only show picks from past weeks to non-owners
+        if current_week:
+            picks = picks.filter(week__number__lt=current_week.number)
+    
     context = {
         'entry': entry,
         'picks': picks,
@@ -145,6 +166,7 @@ def entry_detail(request, entry_id):
         'current_week_picks': current_week_picks,
         'available_teams': available_teams,
         'is_double_pick': is_double_pick,
+        'is_owner': is_owner,  # Pass ownership status to template
     }
     
     return render(request, 'pool/entry_detail.html', context)

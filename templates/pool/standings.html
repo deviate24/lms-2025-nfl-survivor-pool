@@ -43,7 +43,11 @@
                             <tbody>
                                 {% for entry in alive_entries %}
                                     <tr>
-                                        <td>{{ entry.entry_name }}</td>
+                                        <td>
+                                            <a href="{% url 'entry_detail' entry.id %}" class="text-decoration-none d-block">
+                                                {{ entry.entry_name }} <i class="bi bi-box-arrow-up-right small text-muted ms-1"></i>
+                                            </a>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -70,7 +74,11 @@
                             <tbody>
                                 {% for entry in eliminated_entries %}
                                     <tr>
-                                        <td>{{ entry.entry_name }}</td>
+                                        <td>
+                                            <a href="{% url 'entry_detail' entry.id %}" class="text-decoration-none d-block">
+                                                {{ entry.entry_name }} <i class="bi bi-box-arrow-up-right small text-muted ms-1"></i>
+                                            </a>
+                                        </td>
                                         <td>Week {{ entry.eliminated_in_week.number }}</td>
                                         <td>
                                             {% with last_pick=entry.picks.last %}
