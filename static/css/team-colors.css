@@ -1,0 +1,89 @@
+/* NFL Team Colors CSS */
+
+/* Team badge base styling */
+.team-badge {
+    width: auto;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: white !important;
+    text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.7);
+    transition: all 0.2s ease-in-out;
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.3rem;
+    margin-right: 0.3rem;
+    border-radius: 0.25rem;
+}
+
+/* Hover effect */
+.team-badge:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Team-specific colors */
+.team-ARI, span.badge:contains("ARI") { background-color: #97233F !important; } /* Cardinals */
+.team-ATL, span.badge:contains("ATL") { background-color: #A71930 !important; } /* Falcons */
+.team-BAL, span.badge:contains("BAL") { background-color: #241773 !important; } /* Ravens */
+.team-BUF, span.badge:contains("BUF") { background-color: #00338D !important; } /* Bills */
+.team-CAR, span.badge:contains("CAR") { background-color: #0085CA !important; } /* Panthers */
+.team-CHI, span.badge:contains("CHI") { background-color: #0B162A !important; } /* Bears */
+.team-CIN, span.badge:contains("CIN") { background-color: #FB4F14 !important; color: black !important; } /* Bengals */
+.team-CLE, span.badge:contains("CLE") { background-color: #FF3C00 !important; } /* Browns */
+.team-DAL, span.badge:contains("DAL") { background-color: #002244 !important; } /* Cowboys */
+.team-DEN, span.badge:contains("DEN") { background-color: #FB4F14 !important; } /* Broncos */
+.team-DET, span.badge:contains("DET") { background-color: #0076B6 !important; } /* Lions */
+.team-GB, span.badge:contains("GB") { background-color: #203731 !important; } /* Packers */
+.team-HOU, span.badge:contains("HOU") { background-color: #03202F !important; } /* Texans */
+.team-IND, span.badge:contains("IND") { background-color: #002C5F !important; } /* Colts */
+.team-JAX, span.badge:contains("JAX") { background-color: #006778 !important; } /* Jaguars */
+.team-KC, span.badge:contains("KC") { background-color: #E31837 !important; } /* Chiefs */
+.team-LV, span.badge:contains("LV") { background-color: #000000 !important; } /* Raiders */
+.team-LAC, span.badge:contains("LAC") { background-color: #0080C6 !important; } /* Chargers */
+.team-LAR, span.badge:contains("LAR") { background-color: #003594 !important; } /* Rams */
+.team-MIA, span.badge:contains("MIA") { background-color: #008E97 !important; } /* Dolphins */
+.team-MIN, span.badge:contains("MIN") { background-color: #4F2683 !important; } /* Vikings */
+.team-NE, span.badge:contains("NE") { background-color: #002244 !important; } /* Patriots */
+.team-NO, span.badge:contains("NO") { background-color: #D3BC8D !important; color: black !important; } /* Saints */
+.team-NYG, span.badge:contains("NYG") { background-color: #0B2265 !important; } /* Giants */
+.team-NYJ, span.badge:contains("NYJ") { background-color: #125740 !important; } /* Jets */
+.team-PHI, span.badge:contains("PHI") { background-color: #004C54 !important; } /* Eagles */
+.team-PIT, span.badge:contains("PIT") { background-color: #FFB612 !important; color: black !important; } /* Steelers */
+.team-SF, span.badge:contains("SF") { background-color: #AA0000 !important; } /* 49ers */
+.team-SEA, span.badge:contains("SEA") { background-color: #002244 !important; } /* Seahawks */
+.team-TB, span.badge:contains("TB") { background-color: #D50A0A !important; } /* Buccaneers */
+.team-TEN, span.badge:contains("TEN") { background-color: #0C2340 !important; } /* Titans */
+.team-WAS, span.badge:contains("WAS") { background-color: #773141 !important; } /* Commanders */
+
+/* Some additional classes for text-only rendering */
+span.badge:contains("Atlanta Falcons") { background-color: #A71930 !important; }
+span.badge:contains("Baltimore Ravens") { background-color: #241773 !important; }
+span.badge:contains("Buffalo Bills") { background-color: #00338D !important; }
+span.badge:contains("Carolina Panthers") { background-color: #0085CA !important; }
+span.badge:contains("Chicago Bears") { background-color: #0B162A !important; }
+span.badge:contains("Cincinnati Bengals") { background-color: #FB4F14 !important; color: black !important; }
+span.badge:contains("Cleveland Browns") { background-color: #FF3C00 !important; }
+span.badge:contains("Dallas Cowboys") { background-color: #002244 !important; }
+span.badge:contains("Denver Broncos") { background-color: #FB4F14 !important; }
+span.badge:contains("Detroit Lions") { background-color: #0076B6 !important; }
+span.badge:contains("Green Bay Packers") { background-color: #203731 !important; }
+span.badge:contains("Houston Texans") { background-color: #03202F !important; }
+span.badge:contains("Indianapolis Colts") { background-color: #002C5F !important; }
+span.badge:contains("Jacksonville Jaguars") { background-color: #006778 !important; }
+span.badge:contains("Kansas City Chiefs") { background-color: #E31837 !important; }
+span.badge:contains("Las Vegas Raiders") { background-color: #000000 !important; }
+span.badge:contains("Los Angeles Chargers") { background-color: #0080C6 !important; }
+span.badge:contains("Los Angeles Rams") { background-color: #003594 !important; }
+span.badge:contains("Miami Dolphins") { background-color: #008E97 !important; }
+span.badge:contains("Minnesota Vikings") { background-color: #4F2683 !important; }
+span.badge:contains("New England Patriots") { background-color: #002244 !important; }
+span.badge:contains("New Orleans Saints") { background-color: #D3BC8D !important; color: black !important; }
+span.badge:contains("New York Giants") { background-color: #0B2265 !important; }
+span.badge:contains("New York Jets") { background-color: #125740 !important; }
+span.badge:contains("Philadelphia Eagles") { background-color: #004C54 !important; }
+span.badge:contains("Pittsburgh Steelers") { background-color: #FFB612 !important; color: black !important; }
+span.badge:contains("San Francisco 49ers") { background-color: #AA0000 !important; }
+span.badge:contains("Seattle Seahawks") { background-color: #002244 !important; }
+span.badge:contains("Tampa Bay Buccaneers") { background-color: #D50A0A !important; }
+span.badge:contains("Tennessee Titans") { background-color: #0C2340 !important; }
+span.badge:contains("Washington Commanders") { background-color: #773141 !important; }

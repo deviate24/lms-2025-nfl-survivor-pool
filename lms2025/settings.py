@@ -152,3 +152,11 @@ LOGIN_URL = 'login'
 
 # NFL Season settings
 NFL_SEASON_YEAR = 2025
+
+# CSRF and Session Settings
+CSRF_COOKIE_SAMESITE = 'Lax'  # Allow CSRF cookie in same-site requests
+SESSION_COOKIE_SAMESITE = 'Lax'  # Allow session cookie in same-site requests
+CSRF_COOKIE_SECURE = False  # Set to True only in HTTPS environments
+SESSION_COOKIE_SECURE = False  # Set to True only in HTTPS environments
+CSRF_USE_SESSIONS = True  # Store CSRF token in the session instead of cookie
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to access the CSRF cookie

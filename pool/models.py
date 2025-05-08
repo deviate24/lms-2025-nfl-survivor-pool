@@ -114,6 +114,45 @@ class Pool(models.Model):
     def get_alive_entries_count(self):
         """Get the count of entries still alive in this pool"""
         return self.entries.filter(is_alive=True).count()
+    
+    def process_missing_picks_eliminations(self):
+        """Automatically eliminate entries that didn't make a pick by the deadline"""
+        now = timezone.now()
+        
+        # Find weeks where deadline has passed but we're still within the week's timeframe
+        active_weeks = Week.objects.filter(
+            deadline__lt=now,
+            end_date__gte=now
+        )
+        
+        eliminated_count = 0
+        
+        for week in active_weeks:
+            # Get alive entries for this pool
+            alive_entries = self.entries.filter(is_alive=True)
+            
+            for entry in alive_entries:
+                # Check if this entry has a pick for this week
+                has_pick = Pick.objects.filter(entry=entry, week=week).exists()
+                
+                if not has_pick:
+                    # No pick was made before deadline - eliminate the entry
+                    entry.is_alive = False
+                    entry.eliminated_in_week = week
+                    entry.save()
+                    
+                    # Log the elimination
+                    AuditLog.create(
+                        user=None,
+                        action="Auto-Eliminated",
+                        entry=entry,
+                        week=week,
+                        details="Automatically eliminated due to no pick by deadline"
+                    )
+                    
+                    eliminated_count += 1
+        
+        return eliminated_count
 
 
 class Entry(models.Model):
@@ -159,6 +198,16 @@ class Entry(models.Model):
         self.is_alive = False
         self.eliminated_in_week = week
         self.save()
+        
+    def get_last_pick_for_week(self, week):
+        """Get the last pick for a specific week"""
+        return self.picks.filter(week=week).last()
+        
+    def get_last_pick_in_elimination_week(self):
+        """Get the last pick for the week this entry was eliminated in"""
+        if not self.eliminated_in_week:
+            return None
+        return self.picks.filter(week=self.eliminated_in_week).last()
 
 
 class Pick(models.Model):
@@ -336,7 +385,8 @@ class WeeklyResult(models.Model):
             # Update each pick's result
             for pick in picks:
                 pick.result = self.result
-                pick.save(update_fields=['result'])
+                # Pass admin_request flag to bypass deadline validation
+                pick.save(update_fields=['result'], admin_request=True)
                 
                 # Get the pool settings to check if this is a double-pick week
                 pool = pick.entry.pool

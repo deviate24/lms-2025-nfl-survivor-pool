@@ -12,12 +12,12 @@
         
         <ul class="nav nav-tabs mb-4" id="standingsTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="alive-tab" data-bs-toggle="tab" data-bs-target="#alive" type="button" role="tab" aria-controls="alive" aria-selected="true">
+                <button class="nav-link {% if not request.GET.tab or request.GET.tab == 'alive' %}active{% endif %}" id="alive-tab" data-bs-toggle="tab" data-bs-target="#alive" type="button" role="tab" aria-controls="alive" aria-selected="{% if not request.GET.tab or request.GET.tab == 'alive' %}true{% else %}false{% endif %}">
                     Alive ({{ alive_entries.count }})
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="eliminated-tab" data-bs-toggle="tab" data-bs-target="#eliminated" type="button" role="tab" aria-controls="eliminated" aria-selected="false">
+                <button class="nav-link {% if request.GET.tab == 'eliminated' %}active{% endif %}" id="eliminated-tab" data-bs-toggle="tab" data-bs-target="#eliminated" type="button" role="tab" aria-controls="eliminated" aria-selected="{% if request.GET.tab == 'eliminated' %}true{% else %}false{% endif %}">
                     Eliminated ({{ eliminated_entries.count }})
                 </button>
             </li>
@@ -31,7 +31,7 @@
         </ul>
         
         <div class="tab-content" id="standingsTabsContent">
-            <div class="tab-pane fade show active" id="alive" role="tabpanel" aria-labelledby="alive-tab">
+            <div class="tab-pane fade {% if not request.GET.tab or request.GET.tab == 'alive' %}show active{% endif %}" id="alive" role="tabpanel" aria-labelledby="alive-tab">
                 {% if alive_entries %}
                     <div class="table-responsive">
                         <table class="table table-striped">
@@ -60,14 +60,32 @@
                 {% endif %}
             </div>
             
-            <div class="tab-pane fade" id="eliminated" role="tabpanel" aria-labelledby="eliminated-tab">
+            <div class="tab-pane fade {% if request.GET.tab == 'eliminated' %}show active{% endif %}" id="eliminated" role="tabpanel" aria-labelledby="eliminated-tab">
                 {% if eliminated_entries %}
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Entry</th>
-                                    <th>Eliminated In</th>
+                                    <th>
+                                        <a href="{% url 'standings' pool.id %}?tab=eliminated&sort=entry_name{% if request.GET.sort == 'entry_name' and request.GET.order != 'desc' %}&order=desc{% endif %}" class="text-decoration-none d-flex align-items-center">
+                                            Entry
+                                            {% if request.GET.sort == 'entry_name' %}
+                                                <i class="bi {% if request.GET.order == 'desc' %}bi-sort-alpha-down-alt{% else %}bi-sort-alpha-down{% endif %} ms-2"></i>
+                                            {% else %}
+                                                <i class="bi bi-arrow-down-up ms-2 text-muted"></i>
+                                            {% endif %}
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a href="{% url 'standings' pool.id %}?tab=eliminated&sort=eliminated_week{% if request.GET.sort == 'eliminated_week' and request.GET.order != 'desc' %}&order=desc{% endif %}" class="text-decoration-none d-flex align-items-center">
+                                            Eliminated In
+                                            {% if request.GET.sort == 'eliminated_week' %}
+                                                <i class="bi {% if request.GET.order == 'desc' %}bi-sort-numeric-down-alt{% else %}bi-sort-numeric-down{% endif %} ms-2"></i>
+                                            {% else %}
+                                                <i class="bi bi-arrow-down-up ms-2 text-muted"></i>
+                                            {% endif %}
+                                        </a>
+                                    </th>
                                     <th>Last Pick</th>
                                 </tr>
                             </thead>
@@ -81,7 +99,7 @@
                                         </td>
                                         <td>Week {{ entry.eliminated_in_week.number }}</td>
                                         <td>
-                                            {% with last_pick=entry.picks.last %}
+                                            {% with last_pick=entry.get_last_pick_in_elimination_week %}
                                                 {% if last_pick %}
                                                     {{ last_pick.team.city }} {{ last_pick.team.name }}
                                                     {% if last_pick.result == 'win' %}
@@ -94,7 +112,7 @@
                                                         <span class="badge bg-secondary">Pending</span>
                                                     {% endif %}
                                                 {% else %}
-                                                    No picks
+                                                    <span class="badge bg-danger">No Pick</span>
                                                 {% endif %}
                                             {% endwith %}
                                         </td>

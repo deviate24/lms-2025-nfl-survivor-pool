@@ -19,14 +19,14 @@ def home(request):
     
     # Get current week
     current_week = Week.objects.filter(
-        start_date__lte=timezone.now().date(),
-        end_date__gte=timezone.now().date()
+        start_date__lte=timezone.now(),
+        end_date__gte=timezone.now()
     ).first()
     
     # If no current week, get the next upcoming week
     if not current_week:
         current_week = Week.objects.filter(
-            start_date__gt=timezone.now().date()
+            start_date__gt=timezone.now()
         ).order_by('start_date').first()
     
     context = {
@@ -44,19 +44,24 @@ def pool_detail(request, pool_id):
     """
     pool = get_object_or_404(Pool, id=pool_id)
     
+    # Process automatic eliminations for entries without picks after deadline
+    eliminated_count = pool.process_missing_picks_eliminations()
+    if eliminated_count > 0:
+        messages.warning(request, f'{eliminated_count} entries were eliminated due to no picks by the deadline.')
+    
     # Get user's entries in this pool
     user_entries = Entry.objects.filter(pool=pool, user=request.user)
     
     # Get current week
     current_week = Week.objects.filter(
-        start_date__lte=timezone.now().date(),
-        end_date__gte=timezone.now().date()
+        start_date__lte=timezone.now(),
+        end_date__gte=timezone.now()
     ).first()
     
     # If no current week, get the next upcoming week
     if not current_week:
         current_week = Week.objects.filter(
-            start_date__gt=timezone.now().date()
+            start_date__gt=timezone.now()
         ).order_by('start_date').first()
     
     # Get all entries in this pool
@@ -120,14 +125,14 @@ def entry_detail(request, entry_id):
     
     # Get current week
     current_week = Week.objects.filter(
-        start_date__lte=timezone.now().date(),
-        end_date__gte=timezone.now().date()
+        start_date__lte=timezone.now(),
+        end_date__gte=timezone.now()
     ).first()
     
     # If no current week, get the next upcoming week
     if not current_week:
         current_week = Week.objects.filter(
-            start_date__gt=timezone.now().date()
+            start_date__gt=timezone.now()
         ).order_by('start_date').first()
     
     # Check if user has made a pick for the current week
@@ -185,7 +190,7 @@ def make_pick(request, entry_id):
         return redirect('home')
     
     # Get current week
-    today = timezone.now().date()
+    today = timezone.now()
     current_week = Week.objects.filter(
         start_date__lte=today,
         end_date__gte=today
@@ -369,14 +374,14 @@ def quick_pick(request, pool_id):
     
     # Get current week
     current_week = Week.objects.filter(
-        start_date__lte=timezone.now().date(),
-        end_date__gte=timezone.now().date()
+        start_date__lte=timezone.now(),
+        end_date__gte=timezone.now()
     ).first()
     
     # If no current week, get the next upcoming week
     if not current_week:
         current_week = Week.objects.filter(
-            start_date__gt=timezone.now().date()
+            start_date__gt=timezone.now()
         ).order_by('start_date').first()
     
     # Check if deadline has passed
@@ -497,20 +502,43 @@ def standings(request, pool_id):
     """
     pool = get_object_or_404(Pool, id=pool_id)
     
+    # Process automatic eliminations for entries without picks after deadline
+    eliminated_count = pool.process_missing_picks_eliminations()
+    if eliminated_count > 0:
+        messages.warning(request, f'{eliminated_count} entries were eliminated due to no picks by the deadline.')
+    
     # Get all entries in this pool
     alive_entries = Entry.objects.filter(pool=pool, is_alive=True)
+    
+    # Apply sorting to eliminated entries if requested
+    sort = request.GET.get('sort')
+    order = request.GET.get('order')
+    
     eliminated_entries = Entry.objects.filter(pool=pool, is_alive=False)
+    
+    if sort == 'entry_name':
+        # Sort by entry name
+        if order == 'desc':
+            eliminated_entries = eliminated_entries.order_by('-entry_name')
+        else:
+            eliminated_entries = eliminated_entries.order_by('entry_name')
+    elif sort == 'eliminated_week':
+        # Sort by elimination week
+        if order == 'desc':
+            eliminated_entries = eliminated_entries.order_by('-eliminated_in_week__number')
+        else:
+            eliminated_entries = eliminated_entries.order_by('eliminated_in_week__number')
     
     # Get current week
     current_week = Week.objects.filter(
-        start_date__lte=timezone.now().date(),
-        end_date__gte=timezone.now().date()
+        start_date__lte=timezone.now(),
+        end_date__gte=timezone.now()
     ).first()
     
     # If no current week, get the next upcoming week
     if not current_week:
         current_week = Week.objects.filter(
-            start_date__gt=timezone.now().date()
+            start_date__gt=timezone.now()
         ).order_by('start_date').first()
     
     # Get picks for the current week
@@ -553,6 +581,7 @@ def standings(request, pool_id):
         'current_week': current_week,
         'current_week_picks': current_week_picks,
         'teams_with_counts': teams_with_counts,
+        'current_tab': request.GET.get('tab', 'alive'),
     }
     
     return render(request, 'pool/standings.html', context)
@@ -595,12 +624,16 @@ def week_picks(request, pool_id, week_number):
             'count': item['count']
         })
     
+    # Check if this is a double pick week for this pool
+    week_settings = PoolWeekSettings.objects.filter(pool=pool, week=week).first()
+    is_double_pick = week_settings.is_double if week_settings else False
+    
     context = {
         'pool': pool,
         'week': week,
         'picks': picks,
         'teams_with_counts': teams_with_counts,
-        'is_double_pick': week.is_double,
+        'is_double_pick': is_double_pick,
     }
     
     return render(request, 'pool/week_picks.html', context)
