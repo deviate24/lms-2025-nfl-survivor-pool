@@ -558,6 +558,13 @@ def standings(request, pool_id):
     return render(request, 'pool/standings.html', context)
 
 
+def rules(request):
+    """
+    View for displaying the NFL Survivor Pool rules.
+    """
+    return render(request, 'pool/rules.html')
+
+
 @login_required
 def week_picks(request, pool_id, week_number):
     """
