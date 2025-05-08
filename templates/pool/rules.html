@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}NFL Survivor Pool Rules - LMS 2025{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h1 class="h2 mb-0">NFL Survivor Pool Rules</h1>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h2 class="h4">Basic Concept</h2>
+                    <p>
+                        The NFL Survivor Pool is a season-long competition where participants pick one NFL team each week to win. 
+                        The key twist: <strong>you can only use each team once during the entire season</strong>.
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h4">How to Play</h2>
+                    <ol>
+                        <li>Each week, select one NFL team you believe will win their game.</li>
+                        <li>If your selected team wins, you "survive" and continue to the next week.</li>
+                        <li>If your selected team loses or ties, you're eliminated from the pool.</li>
+                        <li>You cannot pick the same team twice in a season.</li>
+                        <li>All picks must be submitted before the weekly deadline (typically Thursday at 4:00 PM PT for the first game of the week).</li>
+                    </ol>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h4">Special Weeks</h2>
+                    <p>Some weeks may be designated as "Double-Pick" weeks:</p>
+                    <ul>
+                        <li>You must select two different teams to win.</li>
+                        <li><strong>You need both picks to be correct to automatically advance.</strong></li>
+                        <li>If no entries pick both teams correctly, then entries with one correct pick will advance.</li>
+                        <li>If multiple entries have the same number of correct picks (1 out of 2), they all advance to the next week.</li>
+                        <li>If both of your picks lose or tie, you're eliminated regardless of how others performed.</li>
+                        <li>Remember, you still can't reuse any teams from previous weeks.</li>
+                    </ul>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h4">Winning the Pool</h2>
+                    <p>
+                        The last participant(s) standing wins the pool. If multiple participants survive until the end of the regular season, the prize will be split equally among them.
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h4">Tiebreakers</h2>
+                    <p>If all remaining participants are eliminated in the same week:</p>
+                    <ol>
+                        <li>The participant who correctly picked the most weeks overall wins.</li>
+                        <li>If still tied, the prize is split equally.</li>
+                    </ol>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h4">Deadlines</h2>
+                    <p>
+                        All picks must be submitted before the weekly deadline. The deadline is typically set to Thursday at 4:00 PM PT, or 10 minutes before the first game of the week (whichever comes first).
+                    </p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> Missing a deadline counts as an elimination. No exceptions will be made for late picks.
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h4">Privacy Policy</h2>
+                    <p>
+                        To maintain fairness, current week picks are hidden from other participants until the weekly deadline passes. This prevents players from gaining an advantage by seeing others' selections.
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h4">Pool Entries</h2>
+                    <p>
+                        Participants may have multiple entries in the pool. Each entry:
+                    </p>
+                    <ul>
+                        <li>Must make independent picks</li>
+                        <li>Is tracked separately for elimination</li>
+                        <li>Requires separate entry fees</li>
+                    </ul>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h4">Contact</h2>
+                    <p>
+                        If you have any questions about the rules or need clarification, please contact the pool administrator.
+                    </p>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{% url 'home' %}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Return to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
