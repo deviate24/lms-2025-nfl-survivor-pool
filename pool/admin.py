@@ -272,9 +272,9 @@ class PickAdmin(admin.ModelAdmin):
 
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'user', 'action', 'entry_link', 'week', 'details')
-    list_filter = ('action', 'timestamp', 'week')
-    search_fields = ('user__username', 'entry__entry_name', 'details', 'action')
+    list_display = ('timestamp', 'user', 'action', 'entry_link', 'pool_link', 'week', 'details')
+    list_filter = ('action', 'timestamp', 'week', ('entry__pool', admin.RelatedOnlyFieldListFilter))
+    search_fields = ('user__username', 'entry__entry_name', 'entry__pool__name', 'details', 'action')
     readonly_fields = ('timestamp', 'user', 'action', 'entry', 'week', 'details')
     date_hierarchy = 'timestamp'
     ordering = ('-timestamp',)
@@ -282,11 +282,20 @@ class AuditLogAdmin(admin.ModelAdmin):
     def entry_link(self, obj):
         if obj.entry:
             return format_html('<a href="{0}">{1}</a>', 
-                              f'/admin/pool/entry/{obj.entry.id}/change/', 
-                              obj.entry.entry_name)
+                               f'/admin/pool/entry/{obj.entry.id}/change/', 
+                               obj.entry.entry_name)
         return '-'
     entry_link.short_description = 'Entry'
     entry_link.admin_order_field = 'entry__entry_name'
+    
+    def pool_link(self, obj):
+        if obj.entry and obj.entry.pool:
+            return format_html('<a href="{0}">{1}</a>', 
+                               f'/admin/pool/pool/{obj.entry.pool.id}/change/', 
+                               obj.entry.pool.name)
+        return '-'
+    pool_link.short_description = 'Pool'
+    pool_link.admin_order_field = 'entry__pool__name'
     
     def has_add_permission(self, request):
         """Prevent manual creation of audit logs"""
