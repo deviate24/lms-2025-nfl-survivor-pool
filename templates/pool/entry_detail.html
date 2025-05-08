@@ -5,11 +5,11 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
             <h1 class="h2 mb-0">{{ entry.entry_name }}</h1>
-            {% if entry.is_alive %}
-                <a href="{% url 'make_pick' entry.id %}" class="btn btn-primary d-none d-md-block">Make Pick</a>
-            {% endif %}
+            <a href="{% url 'pool_detail' entry.pool.id %}" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Pool
+            </a>
         </div>
         
         <div class="alert {% if entry.is_alive %}alert-success{% else %}alert-danger{% endif %}">
@@ -29,11 +29,7 @@
             </div>
         {% endif %}
         
-        {% if entry.is_alive %}
-            <div class="d-grid d-md-none mb-4">
-                <a href="{% url 'make_pick' entry.id %}" class="btn btn-primary btn-lg">Make Pick for Week {{ current_week.number }}</a>
-            </div>
-        {% endif %}
+        <!-- Mobile Make Pick button removed to avoid redundancy -->
 
         <div class="row mb-4">
             <div class="col-md-6">

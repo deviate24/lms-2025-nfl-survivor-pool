@@ -1,0 +1,115 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="app-pool module">
+    <h1>{{ title }}</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">Process Results for Week {{ week.number }}</h2>
+        </div>
+        <div class="card-body">
+            <p>
+                Set the win/loss results for teams that played in Week {{ week.number }}.
+                This will automatically update all picks that used these teams and eliminate entries that picked losing teams.
+            </p>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>AFC</h3>
+                        
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Team</th>
+                                    <th>Result</th>
+                                    <th>Picks</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for team_data in afc_teams %}
+                                    <tr>
+                                        <td>{{ team_data.team.city }} {{ team_data.team.name }}</td>
+                                        <td>
+                                            <select name="result_{{ team_data.team.id }}" class="form-select">
+                                                <option value="">-- Select Result --</option>
+                                                <option value="win" {% if team_data.result == 'win' %}selected{% endif %}>Win</option>
+                                                <option value="loss" {% if team_data.result == 'loss' %}selected{% endif %}>Loss</option>
+                                                <option value="tie" {% if team_data.result == 'tie' %}selected{% endif %}>Tie</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if team_data.has_picks %}warning{% else %}secondary{% endif %}">
+                                                {{ team_data.pick_count }} picks
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="notes_{{ team_data.team.id }}" class="form-control" 
+                                                   value="{{ team_data.notes }}"
+                                                   placeholder="Optional notes">
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h3>NFC</h3>
+                        
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Team</th>
+                                    <th>Result</th>
+                                    <th>Picks</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for team_data in nfc_teams %}
+                                    <tr>
+                                        <td>{{ team_data.team.city }} {{ team_data.team.name }}</td>
+                                        <td>
+                                            <select name="result_{{ team_data.team.id }}" class="form-select">
+                                                <option value="">-- Select Result --</option>
+                                                <option value="win" {% if team_data.result == 'win' %}selected{% endif %}>Win</option>
+                                                <option value="loss" {% if team_data.result == 'loss' %}selected{% endif %}>Loss</option>
+                                                <option value="tie" {% if team_data.result == 'tie' %}selected{% endif %}>Tie</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if team_data.has_picks %}warning{% else %}secondary{% endif %}">
+                                                {{ team_data.pick_count }} picks
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="notes_{{ team_data.team.id }}" class="form-control" 
+                                                   value="{{ team_data.notes }}"
+                                                   placeholder="Optional notes">
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                    <a href="{% url 'admin:pool_week_changelist' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" name="action" value="save" class="btn btn-primary">Save Results</button>
+                    <button type="submit" name="action" value="reset" class="btn btn-danger" 
+                            onclick="return confirm('Are you sure you want to reset all results for Week {{ week.number }}? This will delete all win/loss records for this week.')">
+                        Reset All Results
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

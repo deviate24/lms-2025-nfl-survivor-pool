@@ -47,6 +47,11 @@ class PickForm(forms.ModelForm):
             # Get available teams for this entry
             available_teams = self.entry.get_available_teams(self.week)
             
+            # If we're editing an existing pick, make sure the current team is included in the options
+            if hasattr(self, 'instance') and self.instance and self.instance.pk and self.instance.team:
+                # Add the current team to the queryset
+                available_teams = available_teams | Team.objects.filter(pk=self.instance.team.pk)
+            
             # Update the team field to only show available teams
             self.fields['team'].queryset = available_teams
             self.fields['team'].label = f"Select your team for Week {self.week.number}"

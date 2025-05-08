@@ -3,9 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Count, Q
-from .models import Entry, Pick, Week, Pool, PoolWeekSettings
-
-from .models import Pool, Entry, Pick, Week, Team
+from .models import Pool, Entry, Team, Week, Pick, PoolWeekSettings, AuditLog
 from .forms import PickForm, DoublePickForm, QuickPickForm
 
 
@@ -64,12 +62,30 @@ def pool_detail(request, pool_id):
     alive_entries = all_entries.filter(is_alive=True)
     eliminated_entries = all_entries.filter(is_alive=False)
     
+    # Get the current picks for each of the user's entries
+    entries_with_picks = []
+    for entry in user_entries:
+        # Get the current week's pick(s) for this entry
+        picks = Pick.objects.filter(entry=entry, week=current_week).select_related('team')
+        entry_data = {
+            'entry': entry,
+            'picks': picks,
+            'has_pick': picks.exists()
+        }
+        entries_with_picks.append(entry_data)
+    
+    # Get the week settings to check if it's a double-pick week
+    week_settings = None
+    if current_week:
+        week_settings = PoolWeekSettings.objects.filter(pool=pool, week=current_week).first()
+    
     context = {
         'pool': pool,
-        'user_entries': user_entries,
+        'entries_with_picks': entries_with_picks,
         'current_week': current_week,
         'alive_entries': alive_entries,
         'eliminated_entries': eliminated_entries,
+        'is_double_pick': week_settings.is_double if week_settings else False,
     }
     
     return render(request, 'pool/pool_detail.html', context)
@@ -189,11 +205,34 @@ def make_pick(request, entry_id):
             form = DoublePickForm(request.POST, entry=entry, week=current_week)
             
             if form.is_valid():
+                # Get the selected teams from the form
+                team1 = form.cleaned_data['team1']
+                team2 = form.cleaned_data['team2']
+                
+                # Store old teams for audit logging
+                old_team1 = None
+                old_team2 = None
+                if existing_picks.count() >= 2:
+                    old_team1 = existing_picks[0].team
+                    old_team2 = existing_picks[1].team
+                
                 # Delete existing picks for this week
                 existing_picks.delete()
                 
                 # Save new picks
                 picks = form.save()
+                
+                # Create audit log entries
+                if old_team1 and old_team2:
+                    # Log a change of picks
+                    action = "DOUBLE_PICK_CHANGED"
+                    details = f"{entry.entry_name} changed picks for Week {current_week.number} from {old_team1}/{old_team2} to {team1}/{team2}"
+                    AuditLog.create(request.user, action, entry, current_week, details)
+                else:
+                    # Log new picks
+                    action = "DOUBLE_PICK_CREATED"
+                    details = f"{entry.entry_name} picked {team1} and {team2} for Week {current_week.number}"
+                    AuditLog.create(request.user, action, entry, current_week, details)
                 
                 messages.success(request, f"Your picks for Week {current_week.number} have been saved.")
                 return redirect('entry_detail', entry_id=entry.id)
@@ -229,11 +268,15 @@ def make_pick(request, entry_id):
                     # Get the team from the cleaned data
                     team = form.cleaned_data['team']
                     
-                    # Delete any existing picks for this entry and week to avoid duplicates
-                    Pick.objects.filter(entry=entry, week=current_week).delete()
+                    # Check for existing pick to determine if this is a new pick or a change
+                    existing_pick = Pick.objects.filter(entry=entry, week=current_week).first()
                     
-                    # For entries created by admin, we need to be very explicit
-                    # First, delete any existing picks to avoid duplicates
+                    # Store the old team for the audit log if this is a change
+                    old_team = None
+                    if existing_pick:
+                        old_team = existing_pick.team
+                    
+                    # Delete any existing picks for this entry and week to avoid duplicates
                     Pick.objects.filter(entry=entry, week=current_week).delete()
                     
                     # Create a new pick directly instead of using form.save
@@ -245,8 +288,20 @@ def make_pick(request, entry_id):
                     )
                     pick.save()
                     
+                    # Create audit log entry
+                    if old_team:
+                        # Log a pick change
+                        action = "PICK_CHANGED"
+                        details = f"{entry.entry_name} changed pick for Week {current_week.number} from {old_team} to {team}"
+                        AuditLog.create(request.user, action, entry, current_week, details)
+                    else:
+                        # Log a new pick
+                        action = "PICK_CREATED"
+                        details = f"{entry.entry_name} picked {team} for Week {current_week.number}"
+                        AuditLog.create(request.user, action, entry, current_week, details)
+                    
                     messages.success(request, f'Successfully saved your pick of {team} for Week {current_week.number}')
-                    return redirect('entry_detail', entry_id=entry.id)
+                    return redirect('pool_detail', pool_id=entry.pool.id)
                 except ValidationError as e:
                     messages.error(request, str(e))
             # Let the form handle displaying errors
@@ -258,7 +313,11 @@ def make_pick(request, entry_id):
             }
             return render(request, 'pool/make_pick.html', context)
         else:
-            form = PickForm(instance=existing_pick, entry=entry, week=current_week)
+            # Explicitly set the initial team value to the existing pick's team
+            initial_data = {}
+            if existing_pick and existing_pick.team:
+                initial_data = {'team': existing_pick.team}
+            form = PickForm(instance=existing_pick, entry=entry, week=current_week, initial=initial_data)
     
     context = {
         'form': form,

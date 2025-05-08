@@ -2,11 +2,40 @@
 
 {% block title %}Make Pick - {{ entry.entry_name }} - LMS 2025{% endblock %}
 
+{% block head_extra %}
+<style>
+    /* Available Teams Section Styling */
+    .team-badge {
+        font-size: 0.8rem;
+        min-width: 75px;
+        text-align: center;
+        cursor: default;
+        transition: all 0.2s ease;
+    }
+    
+    .team-badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .available-teams-grid .badge.bg-secondary {
+        background-color: #6c757d !important;
+    }
+    
+    /* Add a subtle divider between conferences on mobile */
+    @media (max-width: 767.98px) {
+        .available-teams-grid .col-md-6:first-child {
+            margin-bottom: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h2 class="card-title mb-0">
                     {% if is_double_pick %}
                         Make Double Picks for Week {{ week.number }}
@@ -14,6 +43,9 @@
                         Make Pick for Week {{ week.number }}
                     {% endif %}
                 </h2>
+                <a href="{% url 'pool_detail' entry.pool.id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Back to Pool
+                </a>
             </div>
             <div class="card-body">
                 <h4>{{ entry.entry_name }}</h4>
@@ -25,7 +57,80 @@
                     {% endif %}
                 </div>
                 
-
+                <!-- Available Teams Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">Available Teams</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-3">Teams you haven't used yet this season:</p>
+                        <div class="row available-teams-grid">
+                            {% if is_double_pick %}
+                                {% with available_team_ids=form.fields.team1.queryset|dictsort:"city" %}
+                                <!-- AFC Teams -->
+                                <div class="col-md-6">
+                                    <h6 class="text-muted mb-2">AFC</h6>
+                                    <div class="d-flex flex-wrap gap-1 mb-3">
+                                        {% for team in available_team_ids %}
+                                            {% if team.conference == 'AFC' %}
+                                                <span class="badge bg-secondary p-2 mb-1 team-badge" 
+                                                      title="{{ team.city }} {{ team.name }}">
+                                                    {{ team.abbreviation }}
+                                                </span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <!-- NFC Teams -->
+                                <div class="col-md-6">
+                                    <h6 class="text-muted mb-2">NFC</h6>
+                                    <div class="d-flex flex-wrap gap-1 mb-3">
+                                        {% for team in available_team_ids %}
+                                            {% if team.conference == 'NFC' %}
+                                                <span class="badge bg-secondary p-2 mb-1 team-badge"
+                                                      title="{{ team.city }} {{ team.name }}">
+                                                    {{ team.abbreviation }}
+                                                </span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endwith %}
+                            {% else %}
+                                {% with available_team_ids=form.fields.team.queryset|dictsort:"city" %}
+                                <!-- AFC Teams -->
+                                <div class="col-md-6">
+                                    <h6 class="text-muted mb-2">AFC</h6>
+                                    <div class="d-flex flex-wrap gap-1 mb-3">
+                                        {% for team in available_team_ids %}
+                                            {% if team.conference == 'AFC' %}
+                                                <span class="badge bg-secondary p-2 mb-1 team-badge" 
+                                                      title="{{ team.city }} {{ team.name }}">
+                                                    {{ team.abbreviation }}
+                                                </span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <!-- NFC Teams -->
+                                <div class="col-md-6">
+                                    <h6 class="text-muted mb-2">NFC</h6>
+                                    <div class="d-flex flex-wrap gap-1 mb-3">
+                                        {% for team in available_team_ids %}
+                                            {% if team.conference == 'NFC' %}
+                                                <span class="badge bg-secondary p-2 mb-1 team-badge"
+                                                      title="{{ team.city }} {{ team.name }}">
+                                                    {{ team.abbreviation }}
+                                                </span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endwith %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
                 
                 <form method="post">
                     {% csrf_token %}

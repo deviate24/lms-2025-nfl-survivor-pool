@@ -260,11 +260,73 @@ class Pick(models.Model):
         # Signal will handle sending confirmation email
 
 
+class WeeklyResult(models.Model):
+    """
+    Records the win/loss result for each team in a given week.
+    This is set by admins after games are completed.
+    """
+    week = models.ForeignKey(Week, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    result = models.CharField(
+        max_length=10,
+        choices=[
+            ('win', 'Win'),
+            ('loss', 'Loss'),
+            ('tie', 'Tie'),  # For NFL games that end in a tie
+        ]
+    )
+    notes = models.TextField(blank=True, help_text="Optional notes about the game/result")
+    
+    class Meta:
+        ordering = ['week', 'team__city']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['week', 'team'],
+                name='unique_team_result_per_week'
+            ),
+        ]
+    
+    def __str__(self):
+        return f"{self.team} - {self.get_result_display()} (Week {self.week.number})"
+    
+    def save(self, *args, **kwargs):
+        # Save the result
+        super().save(*args, **kwargs)
+        
+        # Update all picks for this team and week
+        from django.db import transaction
+        with transaction.atomic():
+            # Find all picks for this team and week
+            picks = Pick.objects.filter(team=self.team, week=self.week)
+            
+            # Update each pick's result
+            for pick in picks:
+                pick.result = self.result
+                pick.save(update_fields=['result'])
+                
+                # If this is a loss, eliminate the entry
+                if self.result == 'loss' or self.result == 'tie':
+                    entry = pick.entry
+                    if entry.is_alive:
+                        entry.is_alive = False
+                        entry.eliminated_in_week = self.week
+                        entry.save(update_fields=['is_alive', 'eliminated_in_week'])
+                        
+                        # Log the elimination
+                        AuditLog.create(
+                            user=None,  # System action
+                            action="ENTRY_ELIMINATED",
+                            entry=entry,
+                            week=self.week,
+                            details=f"{entry.entry_name} was eliminated in Week {self.week.number} for picking {self.team}, which {self.get_result_display().lower()}"
+                        )
+
+
 class AuditLog(models.Model):
     """
     Logs administrative actions for transparency and auditing.
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     action = models.CharField(max_length=255)  # Description of the action
     timestamp = models.DateTimeField(auto_now_add=True)
     entry = models.ForeignKey(Entry, on_delete=models.CASCADE, null=True, blank=True)
@@ -275,7 +337,7 @@ class AuditLog(models.Model):
         ordering = ['-timestamp']
     
     def __str__(self):
-        return f"{self.timestamp}: {self.user} - {self.action}"
+        return f"{self.timestamp}: {self.user or 'System'} - {self.action}"
     
     @classmethod
     def create(cls, user, action, entry=None, week=None, details=''):

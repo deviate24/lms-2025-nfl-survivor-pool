@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div class="app-pool module">
+    <h1>Add Multiple Entries</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">Create multiple entries for a user</h2>
+        </div>
+        <div class="card-body">
+            <p>
+                Create multiple entries for a user at once. The entries will be automatically named
+                as "<strong>username 1</strong>", "<strong>username 2</strong>", etc.
+            </p>
+            
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label for="id_pool">Pool:</label>
+                            <select name="pool" id="id_pool" class="form-select" required>
+                                <option value="">---------</option>
+                                {% for pool in pools %}
+                                    <option value="{{ pool.id }}">{{ pool.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="id_user">User:</label>
+                            <select name="user" id="id_user" class="form-select" required>
+                                <option value="">---------</option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="id_count">Number of entries to create:</label>
+                            <input type="number" name="count" id="id_count" class="form-control" 
+                                   min="1" max="20" value="1" required>
+                            <small class="form-text text-muted">
+                                Maximum 20 entries can be created at once
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-3">
+                    <a href="{% url 'admin:pool_entry_changelist' %}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create Entries</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
