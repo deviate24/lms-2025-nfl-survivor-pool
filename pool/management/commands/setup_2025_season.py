@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from pool.models import Week, Team, Game
+from pool.models import Week
 import datetime
 
 class Command(BaseCommand):
