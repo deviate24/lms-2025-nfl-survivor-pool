@@ -1,11 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.utils import timezone
 from django.db.models import Count, Q
-from django.http import HttpResponseForbidden
-
-from .models import Pool, Entry, Week, Pick, Team, AuditLog, PoolWeekSettings
+from django.utils import timezone
+from django.urls import reverse
+from .models import Pool, Week, Team, Entry, Pick, PoolWeekSettings, WeeklyResult, AuditLog
 from .forms import PickForm, QuickPickForm, DoublePickForm
 
 
@@ -541,9 +540,12 @@ def standings(request, pool_id):
             start_date__gt=timezone.now()
         ).order_by('start_date').first()
     
-    # Get picks for the current week
+    # Get picks for the current week and previous week
     current_week_picks = None
     teams_with_counts = None
+    previous_week = None
+    previous_week_picks = None
+    previous_teams_with_counts = None
     user_entries_ids = []
     
     # Get the user's entries IDs for this pool
@@ -551,8 +553,12 @@ def standings(request, pool_id):
         user_entries_ids = Entry.objects.filter(pool=pool, user=request.user).values_list('id', flat=True)
     
     if current_week:
+        # Try to get the previous week
+        if current_week.number > 1:
+            previous_week = Week.objects.filter(number=current_week.number-1).first()
+        
         if current_week.is_past_deadline():
-            # If deadline has passed, show all picks
+            # If deadline has passed, show all picks for current week
             current_week_picks = Pick.objects.filter(week=current_week, entry__pool=pool)
             
             # Count how many entries picked each team
@@ -568,11 +574,96 @@ def standings(request, pool_id):
                     'team': team,
                     'count': item['count']
                 })
+                
+            # Get only alive entries or entries that were eliminated in the current week
+            # (they should have made a pick but didn't)
+            eligible_entries = Entry.objects.filter(pool=pool).filter(Q(is_alive=True) | Q(eliminated_in_week=current_week)).count()
+            
+            # Get number of entries that made picks for this week
+            entries_with_picks = Pick.objects.filter(week=current_week, entry__pool=pool).values('entry').distinct().count()
+            
+            # Calculate eligible entries with no picks
+            no_pick_count = eligible_entries - entries_with_picks
+            
+            # Add No Pick to the distribution if there are entries without picks
+            if no_pick_count > 0:
+                teams_with_counts.append({
+                    'team': None,  # No team selected
+                    'count': no_pick_count,
+                    'is_no_pick': True  # Flag to identify this as No Pick in template
+                })
+            
+            # Process previous week data if available
+            if previous_week:
+                # Get previous week picks
+                previous_week_picks = Pick.objects.filter(week=previous_week, entry__pool=pool)
+                
+                # Count how many entries picked each team in previous week
+                prev_team_counts = previous_week_picks.values('team').annotate(
+                    count=Count('entry', distinct=True)
+                ).order_by('-count')
+                
+                # Get team objects for the counts
+                previous_teams_with_counts = []
+                for item in prev_team_counts:
+                    team = Team.objects.get(id=item['team'])
+                    previous_teams_with_counts.append({
+                        'team': team,
+                        'count': item['count']
+                    })
+                
+                # Calculate no picks for previous week - only include entries that were alive at that time
+                # (either still alive or eliminated in this/later weeks)
+                prev_eligible_entries = Entry.objects.filter(pool=pool).filter(
+                    Q(is_alive=True) | 
+                    Q(eliminated_in_week__number__gte=previous_week.number)
+                ).count()
+                
+                prev_entries_with_picks = Pick.objects.filter(week=previous_week, entry__pool=pool).values('entry').distinct().count()
+                prev_no_pick_count = prev_eligible_entries - prev_entries_with_picks
+                
+                if prev_no_pick_count > 0:
+                    previous_teams_with_counts.append({
+                        'team': None,
+                        'count': prev_no_pick_count,
+                        'is_no_pick': True
+                    })
         else:
             # If deadline has not passed, only show user's picks
             if user_entries_ids:
                 current_week_picks = Pick.objects.filter(week=current_week, entry__id__in=user_entries_ids)
                 # Don't show team distribution before deadline
+                
+            # But still show previous week distribution if available
+            if previous_week and previous_week.is_past_deadline():
+                # Get previous week picks
+                previous_week_picks = Pick.objects.filter(week=previous_week, entry__pool=pool)
+                
+                # Count how many entries picked each team in previous week
+                prev_team_counts = previous_week_picks.values('team').annotate(
+                    count=Count('entry', distinct=True)
+                ).order_by('-count')
+                
+                # Get team objects for the counts
+                previous_teams_with_counts = []
+                for item in prev_team_counts:
+                    team = Team.objects.get(id=item['team'])
+                    previous_teams_with_counts.append({
+                        'team': team,
+                        'count': item['count']
+                    })
+                
+                # Calculate no picks for previous week
+                total_entries = Entry.objects.filter(pool=pool).count()
+                prev_entries_with_picks = Pick.objects.filter(week=previous_week, entry__pool=pool).values('entry').distinct().count()
+                prev_no_pick_count = total_entries - prev_entries_with_picks
+                
+                if prev_no_pick_count > 0:
+                    previous_teams_with_counts.append({
+                        'team': None,
+                        'count': prev_no_pick_count,
+                        'is_no_pick': True
+                    })
     
     context = {
         'pool': pool,
@@ -581,6 +672,9 @@ def standings(request, pool_id):
         'current_week': current_week,
         'current_week_picks': current_week_picks,
         'teams_with_counts': teams_with_counts,
+        'previous_week': previous_week,
+        'previous_week_picks': previous_week_picks,
+        'previous_teams_with_counts': previous_teams_with_counts,
         'current_tab': request.GET.get('tab', 'alive'),
     }
     

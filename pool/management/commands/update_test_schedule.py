@@ -11,7 +11,8 @@ class Command(BaseCommand):
         Week.objects.all().delete()
         
         # Start date and time for Week 1
-        start_date = timezone.datetime(2025, 5, 8, 14, 25, 0, tzinfo=timezone.get_current_timezone())
+        today = timezone.now().date()
+        start_date = timezone.datetime(today.year, today.month, today.day, 8, 30, 0, tzinfo=timezone.get_current_timezone())
         
         # Create weeks with the specified pattern
         for week_number in range(1, 19):  # Regular season weeks 1-18

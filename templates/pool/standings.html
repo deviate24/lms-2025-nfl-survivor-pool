@@ -23,8 +23,15 @@
             </li>
             {% if current_week %}
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="distribution-tab" data-bs-toggle="tab" data-bs-target="#distribution" type="button" role="tab" aria-controls="distribution" aria-selected="false">
+                <button class="nav-link {% if request.GET.tab == 'current_distribution' %}active{% endif %}" id="current-distribution-tab" data-bs-toggle="tab" data-bs-target="#current-distribution" type="button" role="tab" aria-controls="current-distribution" aria-selected="{% if request.GET.tab == 'current_distribution' %}true{% else %}false{% endif %}">
                     Week {{ current_week.number }} Distribution
+                </button>
+            </li>
+            {% endif %}
+            {% if previous_week %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link {% if request.GET.tab == 'previous_distribution' %}active{% endif %}" id="previous-distribution-tab" data-bs-toggle="tab" data-bs-target="#previous-distribution" type="button" role="tab" aria-controls="previous-distribution" aria-selected="{% if request.GET.tab == 'previous_distribution' %}true{% else %}false{% endif %}">
+                    Week {{ previous_week.number }} Distribution
                 </button>
             </li>
             {% endif %}
@@ -129,7 +136,7 @@
             </div>
             
             {% if current_week %}
-            <div class="tab-pane fade" id="distribution" role="tabpanel" aria-labelledby="distribution-tab">
+            <div class="tab-pane fade {% if request.GET.tab == 'current_distribution' %}show active{% endif %}" id="current-distribution" role="tabpanel" aria-labelledby="current-distribution-tab">
                 {% if current_week.is_past_deadline and teams_with_counts %}
                     <!-- Show all picks after deadline -->
                     <div class="table-responsive">
@@ -143,8 +150,14 @@
                             <tbody>
                                 {% for item in teams_with_counts %}
                                     <tr>
-                                        <td>{{ item.team.city }} {{ item.team.name }}</td>
-                                        <td>{{ item.count }} entries</td>
+                                        <td>
+                                            {% if item.is_no_pick %}
+                                                <span class="badge bg-danger">No Pick</span>
+                                            {% else %}
+                                                {{ item.team.city }} {{ item.team.name }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.count }} {% if item.count == 1 %}entry{% else %}entries{% endif %}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -156,33 +169,75 @@
                         <p><i class="fas fa-lock me-2"></i> <strong>Privacy Notice:</strong> To maintain fair competition, picks for Week {{ current_week.number }} are hidden until the deadline passes on {{ current_week.deadline|date:"l, F j, Y, g:i A T" }}.</p>
                         <p class="mb-0">You can only see your own picks before the deadline. After the deadline passes, all picks will be visible and a summary report will be emailed to all participants.</p>
                     </div>
-                    
-                    {% if current_week_picks %}
-                        <!-- Show only user's own picks -->
-                        <h6 class="mt-3 mb-3">Your Picks for Week {{ current_week.number }}</h6>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Entry</th>
-                                        <th>Team</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for pick in current_week_picks %}
-                                        <tr>
-                                            <td>{{ pick.entry.entry_name }}</td>
-                                            <td>{{ pick.team.city }} {{ pick.team.name }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% endif %}
                 {% endif %}
             </div>
             {% endif %}
+            
+            {% if previous_week %}
+            <div class="tab-pane fade {% if request.GET.tab == 'previous_distribution' %}show active{% endif %}" id="previous-distribution" role="tabpanel" aria-labelledby="previous-distribution-tab">
+                {% if previous_teams_with_counts %}
+                    <!-- Show previous week picks -->
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Team</th>
+                                    <th>Picked By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in previous_teams_with_counts %}
+                                    <tr>
+                                        <td>
+                                            {% if item.is_no_pick %}
+                                                <span class="badge bg-danger">No Pick</span>
+                                            {% else %}
+                                                {{ item.team.city }} {{ item.team.name }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.count }} {% if item.count == 1 %}entry{% else %}entries{% endif %}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <p>No pick data available for Week {{ previous_week.number }}.</p>
+                    </div>
+                {% endif %}
+                
+            </div>
+            {% endif %}
         </div>
+        
+        {% if current_week and not current_week.is_past_deadline and current_week_picks %}
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Your Picks for Week {{ current_week.number }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Entry</th>
+                                <th>Pick</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pick in current_week_picks %}
+                                <tr>
+                                    <td>{{ pick.entry.entry_name }}</td>
+                                    <td>{{ pick.team.city }} {{ pick.team.name }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         
         <!-- Back to Pool button moved to top of page -->
     </div>
