@@ -208,6 +208,12 @@ class Entry(models.Model):
         if not self.eliminated_in_week:
             return None
         return self.picks.filter(week=self.eliminated_in_week).last()
+        
+    def get_all_picks_in_elimination_week(self):
+        """Get all picks for the week this entry was eliminated in"""
+        if not self.eliminated_in_week:
+            return []
+        return self.picks.filter(week=self.eliminated_in_week).all()
 
 
 class Pick(models.Model):

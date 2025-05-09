@@ -106,18 +106,24 @@
                                         </td>
                                         <td>Week {{ entry.eliminated_in_week.number }}</td>
                                         <td>
-                                            {% with last_pick=entry.get_last_pick_in_elimination_week %}
-                                                {% if last_pick %}
-                                                    {{ last_pick.team.city }} {{ last_pick.team.name }}
-                                                    {% if last_pick.result == 'win' %}
-                                                        <span class="badge bg-success">Win</span>
-                                                    {% elif last_pick.result == 'loss' %}
-                                                        <span class="badge bg-danger">Loss</span>
-                                                    {% elif last_pick.result == 'tie' %}
-                                                        <span class="badge bg-warning">Tie</span>
-                                                    {% else %}
-                                                        <span class="badge bg-secondary">Pending</span>
-                                                    {% endif %}
+                                            {% with all_picks=entry.get_all_picks_in_elimination_week %}
+                                                {% if all_picks %}
+                                                    <div>
+                                                    {% for pick in all_picks %}
+                                                        <div class="mb-1{% if forloop.counter > 1 %} mt-1 pt-1 border-top{% endif %}">
+                                                            {{ pick.team.city }} {{ pick.team.name }}
+                                                            {% if pick.result == 'win' %}
+                                                                <span class="badge bg-success">Win</span>
+                                                            {% elif pick.result == 'loss' %}
+                                                                <span class="badge bg-danger">Loss</span>
+                                                            {% elif pick.result == 'tie' %}
+                                                                <span class="badge bg-warning">Tie</span>
+                                                            {% else %}
+                                                                <span class="badge bg-secondary">Pending</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endfor %}
+                                                    </div>
                                                 {% else %}
                                                     <span class="badge bg-danger">No Pick</span>
                                                 {% endif %}
