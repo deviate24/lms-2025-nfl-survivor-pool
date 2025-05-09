@@ -168,5 +168,5 @@ SESSION_COOKIE_SECURE = True  # Ensure session cookies only sent over HTTPS
 CSRF_USE_SESSIONS = True  # Store CSRF token in the session instead of cookie
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to access the CSRF cookie
 
-# HTTPS Settings
-SECURE_SSL_REDIRECT = True  # Redirect all HTTP traffic to HTTPS
+# HTTPS Settings - only apply in production, not local development
+SECURE_SSL_REDIRECT = not DEBUG  # Only redirect in production (when DEBUG is False)

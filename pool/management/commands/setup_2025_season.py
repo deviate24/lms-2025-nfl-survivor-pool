@@ -31,7 +31,8 @@ class Command(BaseCommand):
                 end_date=week_end,
                 deadline=deadline,
                 is_regular_season=True,
-                reset_pool=False
+                reset_pool=False,
+                reminder_time=week_start + datetime.timedelta(days=2, hours=10)  # Wednesday 10 AM
             )
             
             self.stdout.write(self.style.SUCCESS(
@@ -72,7 +73,8 @@ class Command(BaseCommand):
                 end_date=week_end,
                 deadline=deadline,
                 is_regular_season=False,
-                reset_pool=False
+                reset_pool=False,
+                reminder_time=week_start + datetime.timedelta(days=2, hours=10)  # Wednesday 10 AM
             )
             
             self.stdout.write(self.style.SUCCESS(
