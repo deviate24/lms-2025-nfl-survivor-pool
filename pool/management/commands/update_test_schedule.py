@@ -12,13 +12,13 @@ class Command(BaseCommand):
         
         # Start date and time for Week 1
         today = timezone.now().date()
-        start_date = timezone.datetime(today.year, today.month, today.day, 8, 30, 0, tzinfo=timezone.get_current_timezone())
+        start_date = timezone.datetime(today.year, today.month, today.day, 9, 50, 0, tzinfo=timezone.get_current_timezone())
         
         # Create weeks with the specified pattern
         for week_number in range(1, 19):  # Regular season weeks 1-18
-            # Calculate times based on pattern
-            deadline = start_date + datetime.timedelta(minutes=5)
-            end_date = deadline + datetime.timedelta(minutes=3)
+            # Calculate times based on pattern (using 2-minute increments for faster testing)
+            deadline = start_date + datetime.timedelta(minutes=2)
+            end_date = deadline + datetime.timedelta(minutes=2)
             
             # Create the week
             week = Week.objects.create(
@@ -43,9 +43,9 @@ class Command(BaseCommand):
         
         # Create playoff weeks (19-22)
         for playoff_week in range(19, 23):
-            # Calculate times based on pattern
-            deadline = start_date + datetime.timedelta(minutes=5)
-            end_date = deadline + datetime.timedelta(minutes=3)
+            # Calculate times based on pattern (using 2-minute increments for faster testing)
+            deadline = start_date + datetime.timedelta(minutes=2)
+            end_date = deadline + datetime.timedelta(minutes=2)
             
             # Playoff week descriptions
             if playoff_week == 19:
@@ -57,7 +57,7 @@ class Command(BaseCommand):
             else:
                 description = "Super Bowl"
             
-            # Create playoff week
+            # Create the playoff week
             week = Week.objects.create(
                 number=playoff_week,
                 description=description,
@@ -65,7 +65,7 @@ class Command(BaseCommand):
                 end_date=end_date,
                 deadline=deadline,
                 is_regular_season=False,
-                reset_pool=(playoff_week == 19)  # Reset pool for Wild Card Round
+                reset_pool=False
             )
             
             self.stdout.write(self.style.SUCCESS(

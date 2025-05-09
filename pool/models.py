@@ -185,12 +185,27 @@ class Entry(models.Model):
     
     def get_available_teams(self, week=None):
         """Get teams that are still available to pick"""
-        used_teams = self.get_used_teams()
-        
         # If we're in playoffs and there's a reset, all teams are available
         if week and week.reset_pool:
             return Team.objects.all()
+        
+        # Get teams used in all weeks
+        used_teams = self.get_used_teams()
+        
+        # Special case: If current week deadline hasn't passed yet, don't exclude the
+        # team(s) picked for the current week. This way, other users can't deduce 
+        # what team has been picked by seeing what's missing from the available list
+        if week and not week.is_past_deadline():
+            # Get IDs of teams used in previous weeks only
+            used_team_ids = Pick.objects.filter(
+                entry=self,
+                week__number__lt=week.number  # Only earlier weeks
+            ).values_list('team__id', flat=True).distinct()
             
+            # Return all teams except those used in previous weeks
+            return Team.objects.exclude(id__in=used_team_ids)
+            
+        # Otherwise (after deadline or no specific week), exclude all used teams
         return Team.objects.exclude(id__in=used_teams.values_list('id', flat=True))
     
     def eliminate(self, week):
