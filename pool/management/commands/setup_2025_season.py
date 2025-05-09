@@ -31,8 +31,7 @@ class Command(BaseCommand):
                 end_date=week_end,
                 deadline=deadline,
                 is_regular_season=True,
-                reset_pool=False,
-                double_pick=False,  # Set some weeks to True for double pick weeks if desired
+                reset_pool=False
             )
             
             self.stdout.write(self.style.SUCCESS(
@@ -73,8 +72,7 @@ class Command(BaseCommand):
                 end_date=week_end,
                 deadline=deadline,
                 is_regular_season=False,
-                reset_pool=False,
-                double_pick=False,
+                reset_pool=False
             )
             
             self.stdout.write(self.style.SUCCESS(
