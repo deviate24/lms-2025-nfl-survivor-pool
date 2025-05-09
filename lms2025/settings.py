@@ -18,7 +18,13 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-for-devel
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'deviate.pythonanywhere.com',
+    'lms2025.xyz',
+    'www.lms2025.xyz',
+]
 
 # Application definition
 
@@ -73,18 +79,16 @@ WSGI_APPLICATION = 'lms2025.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Default SQLite for development
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'super',
+        'USER': 'super',
+        'PASSWORD': 'LastManStanding1234!!',
+        'HOST': 'deviate-4555.postgres.pythonanywhere-services.com',
+        'PORT': '14555',
     }
 }
-
-# For production, use PostgreSQL via DATABASE_URL
-if 'DATABASE_URL' in os.environ:
-    import dj_database_url
-    DATABASES['default'] = dj_database_url.config(conn_max_age=600)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -156,7 +160,10 @@ NFL_SEASON_YEAR = 2025
 # CSRF and Session Settings
 CSRF_COOKIE_SAMESITE = 'Lax'  # Allow CSRF cookie in same-site requests
 SESSION_COOKIE_SAMESITE = 'Lax'  # Allow session cookie in same-site requests
-CSRF_COOKIE_SECURE = False  # Set to True only in HTTPS environments
-SESSION_COOKIE_SECURE = False  # Set to True only in HTTPS environments
+CSRF_COOKIE_SECURE = True  # Ensure CSRF cookies only sent over HTTPS
+SESSION_COOKIE_SECURE = True  # Ensure session cookies only sent over HTTPS
 CSRF_USE_SESSIONS = True  # Store CSRF token in the session instead of cookie
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to access the CSRF cookie
+
+# HTTPS Settings
+SECURE_SSL_REDIRECT = True  # Redirect all HTTP traffic to HTTPS
