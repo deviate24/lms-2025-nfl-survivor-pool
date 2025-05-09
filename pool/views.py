@@ -263,7 +263,8 @@ def make_pick(request, entry_id):
                     AuditLog.create(request.user, action, entry, current_week, details)
                 
                 messages.success(request, f"Your picks for Week {current_week.number} have been saved.")
-                return redirect('entry_detail', entry_id=entry.id)
+                # Redirect to pool detail page for consistency with single-pick weeks
+                return redirect('pool_detail', pool_id=entry.pool.id)
         else:
             # If there are existing picks, pre-populate the form
             initial_data = {}
@@ -272,7 +273,7 @@ def make_pick(request, entry_id):
                     'team1': existing_picks[0].team,
                     'team2': existing_picks[1].team,
                 }
-            
+            # Explicitly pass the initial data to the form constructor
             form = DoublePickForm(entry=entry, week=current_week, initial=initial_data)
     else:
         # Regular single-pick week
@@ -561,10 +562,22 @@ def standings(request, pool_id):
             # If deadline has passed, show all picks for current week
             current_week_picks = Pick.objects.filter(week=current_week, entry__pool=pool)
             
-            # Count how many entries picked each team
-            team_counts = current_week_picks.values('team').annotate(
-                count=Count('entry', distinct=True)
-            ).order_by('-count')
+            # Check if this is a double-pick week
+            week_settings = PoolWeekSettings.objects.filter(pool=pool, week=current_week).first()
+            is_double_pick = week_settings.is_double if week_settings else False
+            
+            if is_double_pick:
+                # For double-pick weeks, count all picks (don't use distinct)
+                # This ensures that when an entry is eliminated with two different picks,
+                # both appear in the distribution
+                team_counts = current_week_picks.values('team').annotate(
+                    count=Count('entry')
+                ).order_by('-count')
+            else:
+                # For regular weeks, count distinct entries
+                team_counts = current_week_picks.values('team').annotate(
+                    count=Count('entry', distinct=True)
+                ).order_by('-count')
             
             # Get team objects for the counts
             teams_with_counts = []
@@ -598,10 +611,22 @@ def standings(request, pool_id):
                 # Get previous week picks
                 previous_week_picks = Pick.objects.filter(week=previous_week, entry__pool=pool)
                 
-                # Count how many entries picked each team in previous week
-                prev_team_counts = previous_week_picks.values('team').annotate(
-                    count=Count('entry', distinct=True)
-                ).order_by('-count')
+                # Check if previous week was a double-pick week
+                prev_week_settings = PoolWeekSettings.objects.filter(pool=pool, week=previous_week).first()
+                prev_is_double_pick = prev_week_settings.is_double if prev_week_settings else False
+                
+                if prev_is_double_pick:
+                    # For double-pick weeks, count all picks (don't use distinct)
+                    # This ensures that when an entry is eliminated with two different picks,
+                    # both appear in the distribution
+                    prev_team_counts = previous_week_picks.values('team').annotate(
+                        count=Count('entry')
+                    ).order_by('-count')
+                else:
+                    # For regular weeks, count distinct entries
+                    prev_team_counts = previous_week_picks.values('team').annotate(
+                        count=Count('entry', distinct=True)
+                    ).order_by('-count')
                 
                 # Get team objects for the counts
                 previous_teams_with_counts = []
@@ -642,10 +667,22 @@ def standings(request, pool_id):
                 # Get previous week picks
                 previous_week_picks = Pick.objects.filter(week=previous_week, entry__pool=pool)
                 
-                # Count how many entries picked each team in previous week
-                prev_team_counts = previous_week_picks.values('team').annotate(
-                    count=Count('entry', distinct=True)
-                ).order_by('-count')
+                # Check if previous week was a double-pick week
+                prev_week_settings = PoolWeekSettings.objects.filter(pool=pool, week=previous_week).first()
+                prev_is_double_pick = prev_week_settings.is_double if prev_week_settings else False
+                
+                if prev_is_double_pick:
+                    # For double-pick weeks, count all picks (don't use distinct)
+                    # This ensures that when an entry is eliminated with two different picks,
+                    # both appear in the distribution
+                    prev_team_counts = previous_week_picks.values('team').annotate(
+                        count=Count('entry')
+                    ).order_by('-count')
+                else:
+                    # For regular weeks, count distinct entries
+                    prev_team_counts = previous_week_picks.values('team').annotate(
+                        count=Count('entry', distinct=True)
+                    ).order_by('-count')
                 
                 # Get team objects for the counts
                 previous_teams_with_counts = []
