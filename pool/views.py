@@ -613,10 +613,13 @@ def standings(request, pool_id):
                     })
                 
                 # Calculate no picks for previous week - only include entries that were alive at that time
-                # (either still alive or eliminated in this/later weeks)
+                # We need to look at entries that were alive during that specific week:
+                # 1. Entries still alive now
+                # 2. Entries eliminated specifically in that week (meaning they were alive but didn't pick)
+                # 3. We should NOT include entries eliminated in later weeks (they would have had picks in this week)
                 prev_eligible_entries = Entry.objects.filter(pool=pool).filter(
                     Q(is_alive=True) | 
-                    Q(eliminated_in_week__number__gte=previous_week.number)
+                    Q(eliminated_in_week=previous_week)
                 ).count()
                 
                 prev_entries_with_picks = Pick.objects.filter(week=previous_week, entry__pool=pool).values('entry').distinct().count()
@@ -653,10 +656,15 @@ def standings(request, pool_id):
                         'count': item['count']
                     })
                 
-                # Calculate no picks for previous week
-                total_entries = Entry.objects.filter(pool=pool).count()
+                # Calculate no picks for previous week - only include entries that were alive during that week
+                # We need to be consistent with the same logic used when deadline has passed
+                prev_eligible_entries = Entry.objects.filter(pool=pool).filter(
+                    Q(is_alive=True) | 
+                    Q(eliminated_in_week=previous_week)
+                ).count()
+                
                 prev_entries_with_picks = Pick.objects.filter(week=previous_week, entry__pool=pool).values('entry').distinct().count()
-                prev_no_pick_count = total_entries - prev_entries_with_picks
+                prev_no_pick_count = prev_eligible_entries - prev_entries_with_picks
                 
                 if prev_no_pick_count > 0:
                     previous_teams_with_counts.append({
