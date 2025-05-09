@@ -73,16 +73,25 @@ WSGI_APPLICATION = 'lms2025.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# Using SQLite for both development and production temporarily
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'super',
-        'USER': 'super',
-        'PASSWORD': 'LastManStanding1234!!',
-        'HOST': 'deviate-4555.postgres.pythonanywhere-services.com',
-        'PORT': '14555',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# PostgreSQL configuration is commented out until properly configured
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'your_db_name',
+#         'USER': 'super',
+#         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+#         'HOST': 'deviate-4555.postgres.pythonanywhere-services.com',
+#         'PORT': '14555',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
