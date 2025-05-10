@@ -10,8 +10,9 @@ class Command(BaseCommand):
         # Delete any existing weeks
         Week.objects.all().delete()
         
-        # Start date and time for Week 1 of the 2025 NFL Season (projected to start Sept 4, 2025)
-        start_date = timezone.datetime(2025, 9, 4, 20, 20, 0, tzinfo=timezone.get_current_timezone())
+        # Start date and time for Week 1
+        today = timezone.now().date()
+        start_date = timezone.datetime(today.year, today.month, today.day, 9, 25, 0, tzinfo=timezone.get_current_timezone())
         
         # Create weeks with the specified pattern
         for week_number in range(1, 19):  # Regular season weeks 1-18

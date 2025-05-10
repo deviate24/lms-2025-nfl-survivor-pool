@@ -430,8 +430,10 @@ class WeeklyResult(models.Model):
                     # Count wins for this entry
                     win_count = entry_picks.filter(result='win').count()
                     
-                    if win_count == 0:
-                        # If both picks lost or tied, eliminate immediately
+                    # In double-pick weeks, you need BOTH picks to win (win_count=2)
+                    # Any entry with 0 or 1 wins gets eliminated
+                    if win_count < 2:
+                        # If either pick lost or tied, eliminate immediately
                         if pick.entry.is_alive:
                             pick.entry.is_alive = False
                             pick.entry.eliminated_in_week = self.week
@@ -443,55 +445,8 @@ class WeeklyResult(models.Model):
                                 action="ENTRY_ELIMINATED",
                                 entry=pick.entry,
                                 week=self.week,
-                                details=f"{pick.entry.entry_name} was eliminated in Week {self.week.number} - both picks lost/tied in double-pick week"
+                                details=f"{pick.entry.entry_name} was eliminated in Week {self.week.number} - only had {win_count} win(s) in double-pick week"
                             )
-                    else:
-                        # For entries with at least one win, we need to check if any entry had two wins
-                        # Only do this once per team result update to avoid redundant checks
-                        if self.result == 'win':
-                            # Get all entries in this pool that have picks in this week and are still alive
-                            pool_entries = Entry.objects.filter(
-                                pool=pool, 
-                                is_alive=True, 
-                                picks__week=self.week
-                            ).distinct()
-                            
-                            # Check if any entry has 2 wins
-                            entries_with_two_wins = []
-                            for e in pool_entries:
-                                e_win_count = Pick.objects.filter(
-                                    entry=e, 
-                                    week=self.week, 
-                                    result='win'
-                                ).count()
-                                if e_win_count == 2:
-                                    entries_with_two_wins.append(e)
-                            
-                            # If some entries got both picks right, eliminate entries with only one win
-                            if entries_with_two_wins:
-                                for e in pool_entries:
-                                    if e not in entries_with_two_wins:
-                                        e_win_count = Pick.objects.filter(
-                                            entry=e, 
-                                            week=self.week, 
-                                            result='win'
-                                        ).count()
-                                        
-                                        # If this entry has only one win and we have entries with two wins,
-                                        # eliminate it
-                                        if e_win_count == 1:
-                                            e.is_alive = False
-                                            e.eliminated_in_week = self.week
-                                            e.save(update_fields=['is_alive', 'eliminated_in_week'])
-                                            
-                                            # Log the elimination
-                                            AuditLog.create(
-                                                user=None,  # System action
-                                                action="ENTRY_ELIMINATED",
-                                                entry=e,
-                                                week=self.week,
-                                                details=f"{e.entry_name} was eliminated in Week {self.week.number} - had only one correct pick in double-pick week"
-                                            )
                 else:
                     # Normal elimination for single-pick weeks
                     if self.result == 'loss' or self.result == 'tie':

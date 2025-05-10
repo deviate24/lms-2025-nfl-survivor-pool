@@ -130,6 +130,14 @@ class DoublePickForm(forms.Form):
             # Get available teams for this entry
             available_teams = self.entry.get_available_teams(self.week)
             
+            # If we have initial data (i.e., existing picks), make sure those teams are included
+            # in the queryset even if they've been used in another week
+            if hasattr(self, 'initial'):
+                if 'team1' in self.initial and self.initial['team1']:
+                    available_teams = available_teams | Team.objects.filter(pk=self.initial['team1'].pk)
+                if 'team2' in self.initial and self.initial['team2']:
+                    available_teams = available_teams | Team.objects.filter(pk=self.initial['team2'].pk)
+            
             # Update both team fields to show available teams
             self.fields['team1'].queryset = available_teams
             self.fields['team2'].queryset = available_teams
